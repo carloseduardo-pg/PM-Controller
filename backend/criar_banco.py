@@ -1,18 +1,40 @@
 #!/usr/bin/env python3
 """
 Script de criação do banco MariaDB para o Diário de Bordo de P.O. (PWA).
-Requer: pip install mysql-connector-python
+
+Formas de executar (na raiz do projeto "PM Controller"):
+  python -m backend.criar_banco
+
+Ou pelo IDE em cima deste arquivo (Run Python File) — o caminho do projeto é ajustado abaixo.
 """
 
 from __future__ import annotations
 
-import os
 import sys
+from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Any, Protocol
 
-import mysql.connector
-from mysql.connector import Error
+# Rodar `python .../backend/criar_banco.py` não coloca a raiz do repo em sys.path; corrigimos aqui.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+try:
+    import mysql.connector
+    from mysql.connector import Error
+except ModuleNotFoundError:
+    print(
+        "Dependência ausente: mysql-connector-python.\n"
+        "Na raiz do projeto execute:\n"
+        "  pip install -r requirements.txt\n"
+        "ou:\n"
+        "  pip install mysql-connector-python",
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from None
+
+from backend.config import DB_NAME, get_connection
 
 
 class _SqlCursor(Protocol):
@@ -21,24 +43,6 @@ class _SqlCursor(Protocol):
     def executemany(self, operation: str, seq_params: list) -> None: ...
 
     def fetchone(self) -> dict[str, Any] | None: ...
-
-
-DB_NAME = "po_diary_db"
-
-# Conexão — padrão alinhado ao MariaDB local; sobrescreva com MARIADB_* se precisar
-DB_CONFIG_BASE: dict[str, Any] = {
-    "host": os.environ.get("MARIADB_HOST", "localhost"),
-    "port": int(os.environ.get("MARIADB_PORT", "3306")),
-    "user": os.environ.get("MARIADB_USER", "cadu"),
-    "password": os.environ.get("MARIADB_PASSWORD", "root"),
-}
-
-
-def get_connection(*, database: str | None = None) -> mysql.connector.MySQLConnection:
-    cfg = {**DB_CONFIG_BASE}
-    if database:
-        cfg["database"] = database
-    return mysql.connector.connect(**cfg)
 
 
 def criar_esquema(cursor: _SqlCursor) -> None:
@@ -116,6 +120,25 @@ def criar_esquema(cursor: _SqlCursor) -> None:
                 ON DELETE CASCADE ON UPDATE CASCADE,
             KEY idx_agenda_projeto (projeto_id),
             KEY idx_agenda_data (data_hora_agendada)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS projeto_anexos (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            projeto_id INT UNSIGNED NOT NULL,
+            nome_original VARCHAR(255) NOT NULL,
+            nome_armazenado VARCHAR(255) NOT NULL,
+            mime_type VARCHAR(127) NULL,
+            tamanho_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+            criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_anexos_projeto (projeto_id),
+            CONSTRAINT fk_anexos_projeto
+                FOREIGN KEY (projeto_id) REFERENCES projetos (id)
+                ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """
     )

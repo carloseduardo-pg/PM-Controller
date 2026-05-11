@@ -13,6 +13,9 @@ ENV/
 .env.*
 !.env.example
 
+# Uploads locais (anexos de projeto)
+uploads/
+
 # IDE / OS
 .idea/
 .vscode/

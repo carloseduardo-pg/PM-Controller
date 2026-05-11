@@ -1,0 +1,2719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f7f5" id="meta-theme-color" />
+  <meta name="description" content="Diário de P.O. — controle de atividades e gerenciamento de projetos." />
+  <title>Diário de P.O.</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("po_theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+          var m = document.getElementById("meta-theme-color");
+          if (m) m.setAttribute("content", "#141416");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2337352f'/%3E%3Cpath fill='%23fff' d='M8 10h10v2H8zm0 5h16v2H8zm0 5h12v2H8z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-page: #f7f7f5;
+      --bg-sidebar: #f1f1ef;
+      --bg-card: #ffffff;
+      --bg-input: #ffffff;
+      --border-subtle: rgba(55, 53, 47, 0.09);
+      --border-strong: rgba(55, 53, 47, 0.16);
+      --text: #37352f;
+      --text-muted: rgba(55, 53, 47, 0.65);
+      --accent: #2383e2;
+      --accent-soft: rgba(35, 131, 226, 0.12);
+      --shadow-card: 0 1px 3px rgba(15, 15, 15, 0.06), 0 4px 12px rgba(15, 15, 15, 0.04);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-pill: 999px;
+      --sidebar-w: 260px;
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --wash: rgba(55, 53, 47, 0.06);
+      --wash-strong: rgba(55, 53, 47, 0.08);
+      --wash-heavy: rgba(55, 53, 47, 0.1);
+      --wash-muted: rgba(55, 53, 47, 0.03);
+      --wash-hover: rgba(55, 53, 47, 0.025);
+      --overlay-backdrop: rgba(15, 15, 15, 0.48);
+      --modal-shadow: 0 16px 48px rgba(15, 15, 15, 0.18);
+      --chart-grid: rgba(55, 53, 47, 0.08);
+      --chart-axis: #787774;
+      --chart-doughnut-border: #ffffff;
+      --diario-weekday: #1d4ed8;
+      --diario-date-strong: #0f172a;
+      --hero-g1: rgba(35, 131, 226, 0.14);
+      --hero-g2: rgba(144, 101, 176, 0.1);
+      --hero-border: rgba(35, 131, 226, 0.28);
+      --hero-shadow: 0 2px 12px rgba(35, 131, 226, 0.08);
+      --agenda-card-top: #ffffff;
+      --agenda-card-bot: #fafafa;
+      --agenda-card-shadow: 0 1px 2px rgba(15, 15, 15, 0.04);
+      --sidebar-mobile-shadow: 8px 0 24px rgba(15, 15, 15, 0.08);
+      --backdrop-mobile: rgba(15, 15, 15, 0.35);
+      --brand-mark-bg: #37352f;
+      --brand-mark-fg: #ffffff;
+      --toast-bg: #37352f;
+      --toast-fg: #ffffff;
+      --meta-theme: #f7f7f5;
+      --folder-hover-border: rgba(35, 131, 226, 0.38);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-page: #141416;
+      --bg-sidebar: #1a1a1e;
+      --bg-card: #222226;
+      --bg-input: #2c2c32;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text: #ececec;
+      --text-muted: rgba(236, 236, 236, 0.58);
+      --accent: #5eb3ff;
+      --accent-soft: rgba(94, 179, 255, 0.2);
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
+      --wash: rgba(255, 255, 255, 0.06);
+      --wash-strong: rgba(255, 255, 255, 0.1);
+      --wash-heavy: rgba(255, 255, 255, 0.14);
+      --wash-muted: rgba(255, 255, 255, 0.04);
+      --wash-hover: rgba(255, 255, 255, 0.05);
+      --overlay-backdrop: rgba(0, 0, 0, 0.65);
+      --modal-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+      --chart-grid: rgba(255, 255, 255, 0.08);
+      --chart-axis: #9ca3af;
+      --chart-doughnut-border: #222226;
+      --diario-weekday: #93c5fd;
+      --diario-date-strong: #f1f5f9;
+      --hero-g1: rgba(94, 179, 255, 0.14);
+      --hero-g2: rgba(167, 139, 250, 0.12);
+      --hero-border: rgba(94, 179, 255, 0.28);
+      --hero-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      --agenda-card-top: #28282e;
+      --agenda-card-bot: #222226;
+      --agenda-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --sidebar-mobile-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
+      --backdrop-mobile: rgba(0, 0, 0, 0.55);
+      --brand-mark-bg: #e8eaed;
+      --brand-mark-fg: #141416;
+      --toast-bg: #2c2c32;
+      --toast-fg: #f1f5f9;
+      --meta-theme: #141416;
+      --folder-hover-border: rgba(94, 179, 255, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg-page);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100%;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+    }
+
+    /* —— Sidebar (Notion) —— */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 0.65rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 0.5rem;
+    }
+    .brand-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .notify-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .btn-bell {
+      position: relative;
+      border: none;
+      background: transparent;
+      padding: 0.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: grid;
+      place-items: center;
+      line-height: 0;
+    }
+    .btn-bell:hover {
+      background: var(--wash-strong);
+      color: var(--text);
+    }
+    .bell-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      min-width: 8px;
+      height: 8px;
+      padding: 0;
+      border-radius: 999px;
+      background: #e255a1;
+      border: 2px solid var(--bg-sidebar);
+    }
+    .notify-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      width: min(320px, 85vw);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      z-index: 50;
+      overflow: hidden;
+    }
+    .notify-panel-head {
+      padding: 0.65rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--wash-muted);
+    }
+    .notify-panel-body {
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 0.5rem 0.75rem 0.75rem;
+      font-size: 0.82rem;
+    }
+    .notify-item {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      line-height: 1.35;
+    }
+    .notify-item:last-child { border-bottom: none; }
+    .notify-item strong { display: block; font-size: 0.8rem; margin-bottom: 0.15rem; }
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .home-card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+    .home-card p, .home-card ul {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .home-card ul { padding-left: 1.1rem; }
+
+    /* Diário — lista estilo Asana (empresa = seção, horário à esquerda) */
+    .diario-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .diario-toolbar .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .diario-date-hero {
+      display: flex;
+      align-items: stretch;
+      gap: 0.65rem;
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--hero-g1) 0%, var(--hero-g2) 100%);
+      border: 1px solid var(--hero-border);
+      box-shadow: var(--hero-shadow);
+      margin-bottom: 0.85rem;
+    }
+    .diario-date-nav {
+      flex-shrink: 0;
+      width: 40px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      line-height: 1;
+      transition: background 0.12s ease, opacity 0.12s ease;
+    }
+    .diario-date-nav:hover:not(:disabled) {
+      background: var(--accent-soft);
+    }
+    .diario-date-nav:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .diario-date-center {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+    }
+    .diario-weekday {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--diario-weekday);
+    }
+    .diario-date-long {
+      font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--diario-date-strong);
+      line-height: 1.15;
+    }
+    .diario-date-long em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .diario-date-sub {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      max-width: 42ch;
+      line-height: 1.4;
+    }
+    .diario-date-pick {
+      margin-top: 0.45rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .diario-date-pick input[type="date"] {
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 0.35rem 0.5rem;
+      background: var(--bg-card);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .diario-list-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.65rem;
+    }
+    .diario-list-head .card-title { margin-bottom: 0; }
+    .btn-icon-plus {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.35rem;
+      height: 2.35rem;
+      padding: 0;
+      border-radius: 10px;
+      font-size: 1.35rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background: var(--overlay-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay[hidden] {
+      display: none !important;
+    }
+    .modal-sheet {
+      width: 100%;
+      max-width: 520px;
+      max-height: min(90vh, 720px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--modal-shadow);
+    }
+    .modal-sheet-lg {
+      max-width: 680px;
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1rem 1.15rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--wash-muted);
+    }
+    .modal-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0.15rem 0.35rem;
+      border-radius: 8px;
+    }
+    .modal-close:hover {
+      background: var(--wash-strong);
+      color: var(--text);
+    }
+    .modal-body {
+      padding: 1rem 1.15rem 1.15rem;
+      overflow-y: auto;
+    }
+
+    .folder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.85rem;
+    }
+    .folder-card {
+      position: relative;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      padding: 1rem 0.85rem;
+      padding-top: 2.35rem;
+      cursor: pointer;
+      text-align: center;
+      transition: box-shadow 0.15s ease, transform 0.12s ease, border-color 0.12s ease;
+      box-shadow: var(--agenda-card-shadow);
+    }
+    .folder-card-actions {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.45rem;
+      display: flex;
+      flex-direction: row;
+      gap: 0.2rem;
+      z-index: 2;
+    }
+    .folder-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: none;
+      border-radius: 8px;
+      background: var(--wash-muted);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .folder-icon-btn:hover {
+      background: var(--wash-strong);
+      color: var(--accent);
+    }
+    .folder-icon-btn.folder-btn-del:hover {
+      color: #dc2626;
+      background: rgba(220, 38, 38, 0.12);
+    }
+    .folder-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .folder-card:hover {
+      border-color: var(--folder-hover-border);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-2px);
+    }
+    .folder-icon {
+      font-size: 2.25rem;
+      line-height: 1;
+      margin-bottom: 0.45rem;
+      filter: drop-shadow(0 2px 4px rgba(35, 131, 226, 0.15));
+    }
+    .folder-name {
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin: 0 0 0.25rem;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .folder-client {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .projeto-stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .projeto-stat {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.65rem 0.75rem;
+      border-radius: var(--radius-md);
+      background: var(--wash);
+      border: 1px solid var(--border-subtle);
+    }
+    .projeto-stat strong {
+      display: block;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+    .projeto-stat span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .projeto-atividade-item {
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.84rem;
+    }
+    .projeto-atividade-item:last-child { border-bottom: none; }
+    .projeto-atividade-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    .anexo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.82rem;
+    }
+    .anexo-row:last-child { border-bottom: none; }
+    .anexo-row a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .anexo-row a:hover { text-decoration: underline; }
+
+    #diario-board {
+      margin-top: 0.25rem;
+    }
+    .diario-section {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.65rem;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--agenda-card-shadow);
+    }
+    .diario-section-head {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.65rem 0.9rem;
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--wash-strong);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+    .diario-section-head::-webkit-details-marker { display: none; }
+    .diario-section-icon {
+      font-size: 0.65rem;
+      opacity: 0.55;
+      transition: transform 0.15s ease;
+    }
+    .diario-section:not([open]) .diario-section-icon { transform: rotate(-90deg); }
+    .diario-section-title { flex: 1; min-width: 0; }
+    .diario-section-count {
+      font-size: 0.7rem;
+      font-weight: 600;
+      opacity: 0.55;
+      background: var(--wash-strong);
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+    }
+    .diario-rows-wrap {
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+    }
+    .diario-row {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) auto;
+      gap: 0.65rem 0.65rem;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: start;
+    }
+    .diario-row:last-child { border-bottom: none; }
+    .diario-row:hover { background: var(--wash-hover); }
+    .diario-row-time {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--accent);
+      line-height: 1.35;
+      padding-top: 0.2rem;
+      text-align: right;
+      border-right: 2px solid var(--accent-soft);
+      padding-right: 0.65rem;
+      margin-right: 0.15rem;
+    }
+    .diario-hour-gap {
+      width: 100%;
+      height: 0;
+      margin: 0.4rem 0;
+      border-top: 1px dashed var(--border-strong);
+      opacity: 0.85;
+    }
+    .diario-row-main { min-width: 0; }
+    .diario-row-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .diario-row-proj {
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+    .diario-row-desc {
+      font-size: 0.84rem;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .diario-row-meta {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .diario-row-actions {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      justify-content: flex-end;
+      align-items: flex-start;
+      padding-top: 0.1rem;
+    }
+    .diario-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .diario-icon-btn:hover {
+      background: var(--wash-strong);
+      color: var(--accent);
+    }
+    .diario-icon-btn.diario-btn-del:hover {
+      color: #dc2626;
+      background: rgba(220, 38, 38, 0.12);
+    }
+    .diario-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .pill-cat {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.18rem 0.45rem;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+    .pill-cat-reuniao { background: rgba(245, 158, 11, 0.22); color: #b45309; }
+    .pill-cat-desenvolvimento { background: rgba(35, 131, 226, 0.2); color: #1d4ed8; }
+    .pill-cat-planejamento { background: rgba(144, 101, 176, 0.2); color: #6b21a8; }
+    .pill-cat-suporte { background: rgba(217, 115, 13, 0.2); color: #c2410c; }
+    .pill-cat-documentacao { background: rgba(68, 131, 97, 0.22); color: #166534; }
+    .pill-cat-outro { background: rgba(107, 114, 128, 0.18); color: #4b5563; }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--brand-mark-bg);
+      display: grid;
+      place-items: center;
+      color: var(--brand-mark-fg);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .brand-text strong {
+      display: block;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-text span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .nav-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0.75rem 0.65rem 0.35rem;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 0.55rem 0.65rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: background 0.12s ease;
+    }
+    .nav-btn:hover { background: var(--wash); }
+    .nav-btn.active {
+      background: var(--wash-strong);
+      font-weight: 600;
+    }
+    .nav-btn svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.85;
+      flex-shrink: 0;
+    }
+
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 40;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 0.45rem 0.6rem;
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+    }
+
+    /* —— Main —— */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 1.5rem 1.75rem 2.5rem;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+    .section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-head {
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumb {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      margin-bottom: 0.35rem;
+    }
+    .page-title {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .page-desc {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 52ch;
+      line-height: 1.45;
+    }
+
+    /* —— Cards (Asana-inspired) —— */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 1rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    label.field-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .input, .select, textarea.input {
+      width: 100%;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      font-size: 0.875rem;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    .input:focus, .select:focus, textarea.input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    textarea.input {
+      min-height: 88px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.82rem;
+      transition: transform 0.08s ease, filter 0.12s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+    .btn-ghost {
+      background: var(--wash);
+      color: var(--text);
+    }
+    .btn-ghost:hover { background: var(--wash-heavy); }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+    .toolbar .field { min-width: 120px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .pill-pendente { background: rgba(245, 158, 11, 0.18); color: #b45309; }
+    .pill-concluido { background: rgba(34, 197, 94, 0.18); color: #15803d; }
+    .pill-cancelado { background: rgba(107, 114, 128, 0.2); color: #4b5563; }
+    .pill-adiado { background: rgba(59, 130, 246, 0.18); color: #1d4ed8; }
+
+    .chart-wrap {
+      position: relative;
+      height: 280px;
+      margin-top: 0.5rem;
+    }
+
+    .agenda-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .agenda-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: linear-gradient(180deg, var(--agenda-card-top) 0%, var(--agenda-card-bot) 100%);
+      box-shadow: var(--agenda-card-shadow);
+    }
+    .agenda-card .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      flex-shrink: 0;
+      margin-top: 2px;
+      opacity: 0.65;
+    }
+    .agenda-card .body { flex: 1; min-width: 0; }
+    .agenda-card .title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+      margin-bottom: 0.25rem;
+    }
+    .agenda-card h3 {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .agenda-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      left: 1.25rem;
+      margin: 0 auto;
+      max-width: 380px;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      background: var(--toast-bg);
+      color: var(--toast-fg);
+      font-size: 0.82rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-card);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .toast.err { background: #b91c1c; }
+
+    .empty-hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 0.5rem 0;
+    }
+
+    .settings-hint {
+      margin: 0 0 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .theme-seg {
+      display: inline-flex;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      overflow: hidden;
+      background: var(--bg-input);
+    }
+    .theme-seg button {
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.82rem;
+      padding: 0.55rem 1.1rem;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .theme-seg button + button {
+      border-left: 1px solid var(--border-strong);
+    }
+    .theme-seg button:hover {
+      background: var(--wash);
+    }
+    .theme-seg button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .theme-seg button.active:hover {
+      filter: brightness(1.05);
+    }
+    .settings-list {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .settings-list li { margin-bottom: 0.35rem; }
+    .settings-kv {
+      display: grid;
+      grid-template-columns: 7rem 1fr;
+      gap: 0.35rem 0.75rem;
+      font-size: 0.82rem;
+      margin: 0;
+    }
+    .settings-kv dt {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .settings-kv dd {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .kbd {
+      font-size: 0.7rem;
+      padding: 0.12rem 0.35rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-page);
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 860px) {
+      .menu-toggle { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; }
+      .sidebar {
+        position: fixed;
+        z-index: 30;
+        left: 0;
+        transform: translateX(-102%);
+        transition: transform 0.22s ease;
+        box-shadow: var(--sidebar-mobile-shadow);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { padding: 3.25rem 1rem 2rem; }
+      .backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--backdrop-mobile);
+        z-index: 25;
+      }
+      .backdrop.show { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    Menu
+  </button>
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">PO</div>
+        <div class="brand-text">
+          <strong>Diário de P.O.</strong>
+          <span>Controle de Atividades - Gerenciamento de Projetos</span>
+        </div>
+        <div class="notify-wrap">
+          <button type="button" class="btn-bell" id="btn-bell" aria-label="Notificações" aria-expanded="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="bell-badge" id="bell-badge" hidden aria-hidden="true"></span>
+          </button>
+          <div class="notify-panel" id="notify-panel" hidden role="region" aria-label="Painel de notificações">
+            <div class="notify-panel-head">Notificações</div>
+            <div class="notify-panel-body" id="notify-panel-body">
+              <p class="empty-hint" style="margin:0">Nenhuma notificação no momento.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-label">Navegação</div>
+      <button type="button" class="nav-btn active" data-section="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        Home
+      </button>
+      <button type="button" class="nav-btn" data-section="diario">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
+        Diário
+      </button>
+      <button type="button" class="nav-btn" data-section="projetos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+        Projetos
+      </button>
+      <button type="button" class="nav-btn" data-section="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17v-6"/><path d="M12 17V9"/><path d="M16 17v-3"/></svg>
+        Dashboard
+      </button>
+      <button type="button" class="nav-btn" data-section="relatorio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><path d="M9 5a2 2 0 012-2h2a2 2 0 012 2v0a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+        Relatório
+      </button>
+      <button type="button" class="nav-btn" data-section="agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        Agenda
+      </button>
+      <div class="nav-label" style="margin-top:0.25rem">Sistema</div>
+      <button type="button" class="nav-btn" data-section="ajustes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Ajustes
+      </button>
+    </aside>
+
+    <main class="main">
+      <!-- Home -->
+      <section class="section active" id="section-home">
+        <header class="page-head">
+          <p class="breadcrumb">Início</p>
+          <h1 class="page-title">Bem-vindo ao Diário de P.O.</h1>
+          <p class="page-desc">
+            Seu espaço para registrar o dia a dia como Product Owner ou gerente de projetos: tempo por projeto,
+            agenda com lembretes e visão consolidada no dashboard — tudo em um só lugar, acessível pelo navegador.
+          </p>
+        </header>
+        <div class="home-grid">
+          <div class="card home-card">
+            <h3>O que este aplicativo faz</h3>
+            <p>
+              Centraliza <strong>clientes</strong>, <strong>projetos</strong>, <strong>atividades com duração em minutos</strong>
+              e <strong>compromissos na agenda</strong>, gerando relatórios e gráficos para você enxergar onde está seu tempo.
+            </p>
+          </div>
+          <div class="card home-card">
+            <h3>Comece por aqui</h3>
+            <ul>
+              <li><strong>Diário</strong> — escolha o dia, agrupe por empresa e veja o horário de cada atividade.</li>
+              <li><strong>Dashboard</strong> — visualize distribuição por projeto e ritmo semanal.</li>
+              <li><strong>Agenda</strong> — acompanhe o que está por vir no mês.</li>
+            </ul>
+          </div>
+          <div class="card home-card">
+            <h3>Avisos gerais</h3>
+            <p>
+              Mantenha o <strong>MariaDB</strong> em execução e o servidor da aplicação ativo na sua rede.
+              Em caso de indisponibilidade momentânea da API, os dados podem não atualizar até a conexão voltar.
+            </p>
+          </div>
+          <div class="card home-card">
+            <h3>Dica de uso</h3>
+            <p>
+              Use durações realistas nos registros: elas alimentam diretamente os gráficos de esforço por projeto
+              e por tipo de atividade (reunião, desenvolvimento, etc.).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Diário (filtro por dia + grupos por empresa) -->
+      <section class="section" id="section-diario">
+        <header class="page-head">
+          <p class="breadcrumb">Diário</p>
+          <h1 class="page-title">Controle de atividades</h1>
+          <p class="page-desc" id="diario-subtitle">
+            Escolha o dia trabalhado (hoje ou dias anteriores). As atividades aparecem em blocos por <strong>empresa</strong>,
+            com o horário à esquerda. Use o botão <strong>+</strong> na lista para registrar uma nova ocorrência.
+          </p>
+        </header>
+
+        <div class="card">
+          <div class="diario-date-hero" aria-live="polite">
+            <button type="button" class="diario-date-nav" id="diario-prev-day" aria-label="Dia anterior">‹</button>
+            <div class="diario-date-center">
+              <div class="diario-weekday" id="diario-weekday">—</div>
+              <div class="diario-date-long" id="diario-date-long">—</div>
+              <p class="diario-date-sub" id="diario-date-context">
+                O dia selecionado vale para a lista abaixo e para novos registros via <strong>+</strong>.
+              </p>
+              <label class="diario-date-pick">
+                <span>Alterar data</span>
+                <input id="diario-data" type="date" required />
+              </label>
+            </div>
+            <button type="button" class="diario-date-nav" id="diario-next-day" aria-label="Próximo dia">›</button>
+          </div>
+          <div class="toolbar" style="justify-content:flex-end;margin-top:0.25rem">
+            <button type="button" class="btn btn-ghost" id="diario-refresh">Atualizar lista</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="diario-list-head">
+            <div>
+              <h2 class="card-title">Lista do dia</h2>
+              <p style="margin:0.35rem 0 0;font-size:0.8rem;color:var(--text-muted);max-width:52ch">
+                Cada bloco é uma empresa. As linhas seguem o relógio; traços tracejados marcam mudança de hora.
+              </p>
+            </div>
+            <div class="toolbar" style="gap:0.5rem">
+              <button type="button" class="btn btn-primary btn-icon-plus" id="diario-open-modal" title="Nova ocorrência" aria-label="Adicionar ocorrência ao dia">+</button>
+            </div>
+          </div>
+          <div id="diario-board"></div>
+        </div>
+      </section>
+
+      <!-- Projetos -->
+      <section class="section" id="section-projetos">
+        <header class="page-head">
+          <p class="breadcrumb">Projetos</p>
+          <h1 class="page-title">Suas pastas de projeto</h1>
+          <p class="page-desc">
+            Os mesmos projetos do Diário: abra uma pasta para ver resumo, histórico cronológico de atividades e anexos.
+            Use <strong>Ir ao Diário</strong> para registrar tempo já com o projeto escolhido.
+          </p>
+        </header>
+        <div class="card">
+          <div class="card-header" style="margin-bottom:0">
+            <h2 class="card-title">Meus projetos</h2>
+            <button type="button" class="btn btn-primary" id="btn-novo-projeto">Novo projeto</button>
+          </div>
+          <p style="margin:0.5rem 0 1rem;font-size:0.8rem;color:var(--text-muted)">
+            Clique na pasta para abrir detalhes. Use os ícones para <strong>editar</strong> ou <strong>excluir</strong> o projeto.
+            Ao criar projeto, você pode <strong>cadastrar uma nova empresa</strong> sem sair do formulário.
+          </p>
+          <div id="projetos-grid" class="folder-grid">
+            <p class="empty-hint" style="grid-column:1/-1;margin:0">Carregue esta página pela navegação para listar projetos.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard -->
+      <section class="section" id="section-dashboard">
+        <header class="page-head">
+          <p class="breadcrumb">Geral / Dashboard</p>
+          <h1 class="page-title">
+            <span style="font-size:1.35rem">◎</span>
+            Inteligência do mês
+          </h1>
+          <p class="page-desc">
+            Visão agregada do tempo por projeto e ritmo semanal — filtros atualizam os gráficos sem recarregar a página.
+          </p>
+        </header>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Filtros</h2>
+            <div class="toolbar">
+              <div class="field">
+                <label class="field-label" for="dash-mes">Mês</label>
+                <select id="dash-mes" class="select"></select>
+              </div>
+              <div class="field">
+                <label class="field-label" for="dash-ano">Ano</label>
+                <select id="dash-ano" class="select"></select>
+              </div>
+              <button type="button" class="btn btn-primary" id="dash-refresh">Atualizar gráficos</button>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <h3 class="card-title" style="margin-bottom:0.5rem">Tempo por projeto</h3>
+              <p style="margin:0 0 0.5rem;font-size:0.8rem;color:var(--text-muted)">Distribuição no mês selecionado</p>
+              <div class="chart-wrap"><canvas id="chart-projetos" aria-label="Gráfico tempo por projeto"></canvas></div>
+            </div>
+            <div>
+              <h3 class="card-title" style="margin-bottom:0.5rem">Horas por dia</h3>
+              <p style="margin:0 0 0.5rem;font-size:0.8rem;color:var(--text-muted)">Janela de 7 dias (conforme API)</p>
+              <div class="chart-wrap"><canvas id="chart-semana" aria-label="Gráfico horas por dia"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Relatório -->
+      <section class="section" id="section-relatorio">
+        <header class="page-head">
+          <p class="breadcrumb">Relatório / Dia</p>
+          <h1 class="page-title">Bullet points</h1>
+          <p class="page-desc">Gere o resumo do dia para colar no Notion, e-mail ou status.</p>
+        </header>
+        <div class="card">
+          <div class="card-header" style="margin-bottom:0.75rem">
+            <h2 class="card-title">Resumo copiável</h2>
+            <div class="toolbar">
+              <div class="field">
+                <label class="field-label" for="rep-data">Data</label>
+                <input id="rep-data" class="input" type="date" />
+              </div>
+              <button type="button" class="btn btn-ghost" id="rep-load">Carregar</button>
+              <button type="button" class="btn btn-primary" id="rep-copy">Copiar</button>
+            </div>
+          </div>
+          <label class="field-label" for="rep-text">Pré-visualização</label>
+          <textarea id="rep-text" class="input" style="min-height:220px;font-size:0.875rem" readonly placeholder="Carregue uma data para ver os bullets…"></textarea>
+          <p style="margin:0.75rem 0 0;font-size:0.78rem;color:var(--text-muted)">
+            Dica: use <span class="kbd">Copiar</span> para levar tudo de uma vez.
+          </p>
+        </div>
+      </section>
+
+      <!-- Agenda -->
+      <section class="section" id="section-agenda">
+        <header class="page-head">
+          <p class="breadcrumb">Agenda / Asana</p>
+          <h1 class="page-title">Próximas atividades</h1>
+          <p class="page-desc">Cards com status em pills — alinhado ao calendário do mês.</p>
+        </header>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Compromissos</h2>
+            <div class="toolbar">
+              <div class="field">
+                <label class="field-label" for="ag-mes">Mês</label>
+                <select id="ag-mes" class="select"></select>
+              </div>
+              <div class="field">
+                <label class="field-label" for="ag-ano">Ano</label>
+                <select id="ag-ano" class="select"></select>
+              </div>
+              <button type="button" class="btn btn-primary" id="ag-refresh">Atualizar</button>
+            </div>
+          </div>
+          <div id="agenda-mount" class="agenda-list"></div>
+        </div>
+      </section>
+
+      <!-- Ajustes -->
+      <section class="section" id="section-ajustes">
+        <header class="page-head">
+          <p class="breadcrumb">Sistema / Ajustes</p>
+          <h1 class="page-title">Configurações gerais</h1>
+          <p class="page-desc">
+            Personalize a aparência e consulte informações do aplicativo. As preferências abaixo ficam salvas neste navegador.
+          </p>
+        </header>
+
+        <div class="card">
+          <h2 class="card-title" style="margin-bottom:0.5rem">Aparência</h2>
+          <p class="settings-hint">
+            <strong>Modo claro</strong> é o padrão. No <strong>modo escuro</strong>, fundos e cartões ficam mais escuros e o texto passa para tons claros e cinza, reduzindo o cansaço visual em ambientes com pouca luz.
+          </p>
+          <div class="field-label" style="margin-bottom:0.5rem">Tema da interface</div>
+          <div class="theme-seg" role="group" aria-label="Tema da interface">
+            <button type="button" id="ajuste-theme-light" class="active">Claro</button>
+            <button type="button" id="ajuste-theme-dark">Escuro</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title" style="margin-bottom:0.5rem">Dados e privacidade</h2>
+          <p class="settings-hint">
+            O Diário de P.O. grava suas atividades e projetos no <strong>MariaDB</strong> configurado no servidor. Algumas preferências locais (tema, notificações já vistas, projeto pré-selecionado) ficam só no <strong>armazenamento do navegador</strong>.
+          </p>
+          <ul class="settings-list">
+            <li>Lembretes da agenda usam a API de notificações do sistema quando você autoriza.</li>
+            <li>Para backup completo, mantenha rotinas de backup do banco de dados.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title" style="margin-bottom:0.5rem">Sobre</h2>
+          <dl class="settings-kv">
+            <dt>Aplicativo</dt>
+            <dd>Diário de P.O. · PM Controller</dd>
+            <dt>Interface</dt>
+            <dd>HTML único + API Flask</dd>
+          </dl>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <!-- Modal: nova ocorrência (Diário) -->
+  <div id="modal-diario-overlay" class="modal-overlay" hidden>
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-diario-title">
+      <div class="modal-head">
+        <h3 class="modal-title" id="modal-diario-title">Nova ocorrência</h3>
+        <button type="button" class="modal-close" id="modal-diario-close" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-diario-modal">
+          <input type="hidden" id="modal-diario-log-id" value="" />
+          <div class="row" style="margin-bottom:0.75rem">
+            <div style="grid-column: span 2; min-width:220px">
+              <label class="field-label" for="modal-diario-projeto">Projeto (por empresa)</label>
+              <select id="modal-diario-projeto" class="select" required></select>
+            </div>
+            <div>
+              <label class="field-label" for="modal-diario-hora">Horário</label>
+              <input id="modal-diario-hora" class="input" type="time" required />
+            </div>
+            <div>
+              <label class="field-label" for="modal-diario-duracao">Duração (min)</label>
+              <input id="modal-diario-duracao" class="input" type="number" min="0" step="1" placeholder="30" required />
+            </div>
+            <div>
+              <label class="field-label" for="modal-diario-categoria">Categoria</label>
+              <select id="modal-diario-categoria" class="select"></select>
+            </div>
+          </div>
+          <div style="margin-bottom:1rem">
+            <label class="field-label" for="modal-diario-desc">Descrição</label>
+            <textarea id="modal-diario-desc" class="input" placeholder="O que você fez neste bloco?" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" id="modal-diario-submit">Registrar no dia</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: novo projeto -->
+  <div id="modal-novo-proj-overlay" class="modal-overlay" hidden>
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-novo-proj-title">
+      <div class="modal-head">
+        <h3 class="modal-title" id="modal-novo-proj-title">Novo projeto</h3>
+        <button type="button" class="modal-close" id="modal-novo-proj-close" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-novo-projeto">
+          <input type="hidden" id="novo-proj-edit-id" value="" />
+          <div style="margin-bottom:0.75rem">
+            <label class="field-label" for="novo-proj-cliente">Cliente (empresa)</label>
+            <select id="novo-proj-cliente" class="select" required></select>
+            <button type="button" class="btn btn-ghost" id="btn-toggle-nova-empresa" style="margin-top:0.45rem;width:100%;font-size:0.8rem">
+              + Nova empresa
+            </button>
+            <div id="novo-cliente-inline-wrap" hidden style="margin-top:0.55rem;padding:0.65rem;border-radius:var(--radius-md);border:1px dashed var(--border-strong);background:var(--wash-muted)">
+              <label class="field-label" for="novo-cliente-inline-nome">Nome da nova empresa</label>
+              <div class="toolbar" style="flex-wrap:wrap;gap:0.5rem;align-items:flex-end;margin-top:0.35rem">
+                <input id="novo-cliente-inline-nome" class="input" type="text" placeholder="Ex.: Minha empresa Ltda" style="flex:1;min-width:160px" />
+                <button type="button" class="btn btn-primary" id="btn-salvar-cliente-inline">Salvar empresa</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:0.75rem">
+            <label class="field-label" for="novo-proj-nome">Nome do projeto</label>
+            <input id="novo-proj-nome" class="input" type="text" required placeholder="Ex.: Portal do cliente" />
+          </div>
+          <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;font-size:0.84rem;cursor:pointer;color:var(--text)">
+            <input type="checkbox" id="novo-proj-ativo" checked />
+            Projeto ativo (aparece nas listagens)
+          </label>
+          <button type="submit" class="btn btn-primary" id="novo-proj-submit">Criar projeto</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: detalhe do projeto -->
+  <div id="modal-projeto-overlay" class="modal-overlay" hidden>
+    <div class="modal-sheet modal-sheet-lg" role="dialog" aria-modal="true" aria-labelledby="modal-projeto-title">
+      <div class="modal-head">
+        <h3 class="modal-title" id="modal-projeto-title">Projeto</h3>
+        <button type="button" class="modal-close" id="modal-projeto-close" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body" id="modal-projeto-body">
+        <p class="empty-hint" style="margin:0">Carregando…</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const DIAS_SEMANA = ["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira","sexta-feira","sábado"];
+  const CATEGORIAS = [
+    { v: "reuniao", l: "Reunião" },
+    { v: "desenvolvimento", l: "Desenvolvimento" },
+    { v: "planejamento", l: "Planejamento" },
+    { v: "suporte", l: "Suporte" },
+    { v: "documentacao", l: "Documentação" },
+    { v: "outro", l: "Outro" },
+  ];
+
+  const $ = (sel) => document.querySelector(sel);
+  const toastEl = $("#toast");
+  let toastTimer;
+
+  function toast(msg, isErr) {
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.toggle("err", !!isErr);
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200);
+  }
+
+  function apiBase() {
+    if (typeof location !== "undefined" && (location.protocol === "http:" || location.protocol === "https:")) {
+      return location.origin.replace(/\/$/, "");
+    }
+    return "http://localhost:5000";
+  }
+
+  async function apiGet(path) {
+    const r = await fetch(apiBase() + path, { headers: { Accept: "application/json" } });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
+    return data;
+  }
+
+  async function apiPost(path, body) {
+    const r = await fetch(apiBase() + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
+    return data;
+  }
+
+  async function apiPut(path, body) {
+    const r = await fetch(apiBase() + path, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
+    return data;
+  }
+
+  async function apiDelete(path) {
+    const r = await fetch(apiBase() + path, { method: "DELETE", headers: { Accept: "application/json" } });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
+    return data;
+  }
+
+  async function apiPostForm(path, formData) {
+    const r = await fetch(apiBase() + path, { method: "POST", body: formData });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
+    return data;
+  }
+
+  const LS_PREFILL_PROJETO = "po_prefill_projeto_id";
+  const LS_THEME = "po_theme";
+
+  function getChartTheme() {
+    const cs = getComputedStyle(document.documentElement);
+    return {
+      grid: cs.getPropertyValue("--chart-grid").trim() || "rgba(55,53,47,0.08)",
+      axis: cs.getPropertyValue("--chart-axis").trim() || "#787774",
+      doughnutBorder: cs.getPropertyValue("--chart-doughnut-border").trim() || "#ffffff",
+      legend: cs.getPropertyValue("--text").trim() || "#37352f",
+      ticks: cs.getPropertyValue("--text-muted").trim() || "#787774",
+    };
+  }
+
+  function syncThemeControls() {
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    const bLight = $("#ajuste-theme-light");
+    const bDark = $("#ajuste-theme-dark");
+    if (bLight && bDark) {
+      bLight.classList.toggle("active", !dark);
+      bDark.classList.toggle("active", dark);
+    }
+  }
+
+  function applyTheme(mode) {
+    const dark = mode === "dark";
+    if (dark) document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+    try {
+      localStorage.setItem(LS_THEME, dark ? "dark" : "light");
+    } catch (_) {}
+    const meta = $("#meta-theme-color");
+    if (meta) meta.setAttribute("content", dark ? "#141416" : "#f7f7f5");
+    syncThemeControls();
+    if (chartProj || chartWeek) loadDashboard();
+  }
+
+  /* —— Sino + Notificações (agenda) —— */
+  const LS_NOTIFY_KEYS = "po_diary_notify_keys";
+  let agendaNotifyTimer = null;
+
+  function loadNotifyKeys() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(LS_NOTIFY_KEYS) || "[]");
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveNotifyKeys(set) {
+    const arr = [...set];
+    if (arr.length > 400) arr.splice(0, arr.length - 400);
+    localStorage.setItem(LS_NOTIFY_KEYS, JSON.stringify(arr));
+  }
+
+  function parseNotifyDate(s) {
+    if (!s) return NaN;
+    const str = String(s).trim();
+    const iso = str.includes("T") ? str : str.replace(" ", "T");
+    let ms = Date.parse(iso);
+    if (Number.isNaN(ms) && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(str)) {
+      ms = Date.parse(str.replace(" ", "T") + ":00");
+    }
+    return ms;
+  }
+
+  async function fetchAgendaForNotifications() {
+    const cur = new Date();
+    const mes = cur.getMonth() + 1;
+    const ano = cur.getFullYear();
+    const out = [];
+    const d1 = await apiGet(`/api/agenda?mes=${mes}&ano=${ano}`);
+    for (const x of d1.agenda || []) out.push(x);
+    let nm = mes + 1;
+    let ny = ano;
+    if (nm > 12) {
+      nm = 1;
+      ny++;
+    }
+    try {
+      const d2 = await apiGet(`/api/agenda?mes=${nm}&ano=${ny}`);
+      for (const x of d2.agenda || []) out.push(x);
+    } catch (_) {}
+    return out;
+  }
+
+  async function checkAgendaNotifications() {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const now = Date.now();
+    const WINDOW_MS = 10 * 60 * 1000;
+    let items;
+    try {
+      items = await fetchAgendaForNotifications();
+    } catch {
+      return;
+    }
+    const seen = loadNotifyKeys();
+    const iconUrl = `${location.origin}/icons/icon-192.png`;
+
+    for (const item of items) {
+      if (!item.notificar_em || item.status === "cancelado") continue;
+      const t = parseNotifyDate(item.notificar_em);
+      if (Number.isNaN(t)) continue;
+      if (now < t || now - t > WINDOW_MS) continue;
+      const key = `${item.id}|${item.notificar_em}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      saveNotifyKeys(seen);
+
+      const title = item.titulo || "PO Diary · Agenda";
+      const parts = [];
+      if (item.data_hora_agendada) parts.push(`Evento: ${item.data_hora_agendada}`);
+      if (item.projeto_nome) parts.push(String(item.projeto_nome));
+      const body = parts.length ? parts.join(" · ") : "Lembrete de compromisso";
+
+      try {
+        const n = new Notification(title, {
+          body,
+          icon: iconUrl,
+          badge: iconUrl,
+          tag: `po-agenda-${item.id}-${String(item.notificar_em).replace(/\s/g, "_")}`,
+          requireInteraction: false,
+        });
+        n.onclick = () => {
+          window.focus();
+          n.close();
+        };
+        pushPanelNotice(title, body);
+      } catch (_) {}
+    }
+  }
+
+  function pushPanelNotice(title, body) {
+    const bodyEl = $("#notify-panel-body");
+    const empty = bodyEl.querySelector(".empty-hint");
+    if (empty) empty.remove();
+    const div = document.createElement("div");
+    div.className = "notify-item";
+    div.innerHTML = `<strong>${escapeHtml(title)}</strong>${escapeHtml(body)}`;
+    bodyEl.insertBefore(div, bodyEl.firstChild);
+    const badge = $("#bell-badge");
+    badge.hidden = false;
+  }
+
+  function startAgendaNotifyPolling() {
+    if (agendaNotifyTimer) clearInterval(agendaNotifyTimer);
+    checkAgendaNotifications();
+    agendaNotifyTimer = setInterval(checkAgendaNotifications, 45000);
+  }
+
+  function setupBellPanel() {
+    const btn = $("#btn-bell");
+    const panel = $("#notify-panel");
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = !panel.hidden;
+      panel.hidden = open;
+      btn.setAttribute("aria-expanded", String(!open));
+    });
+    document.addEventListener("click", () => {
+      panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    });
+    panel.addEventListener("click", (e) => e.stopPropagation());
+  }
+
+  function bootstrapNotifications() {
+    if (!("Notification" in window)) return;
+    const go = () => {
+      if (Notification.permission === "granted") startAgendaNotifyPolling();
+    };
+    if (Notification.permission === "default") {
+      Notification.requestPermission().then((p) => {
+        if (p === "granted") startAgendaNotifyPolling();
+      });
+    } else {
+      go();
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && "Notification" in window && Notification.permission === "granted") {
+      checkAgendaNotifications();
+    }
+  });
+
+  /* —— Nav —— */
+  const sidebar = $("#sidebar");
+  const backdrop = $("#backdrop");
+  $("#menu-toggle").addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    backdrop.classList.toggle("show");
+  });
+  backdrop.addEventListener("click", () => {
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+  });
+
+  function navigateToSection(id) {
+    if (!id) return;
+    document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
+    const btn = document.querySelector('.nav-btn[data-section="' + id + '"]');
+    if (btn) btn.classList.add("active");
+    document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
+    $("#section-" + id).classList.add("active");
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+    if (id === "dashboard") loadDashboard();
+    if (id === "agenda") loadAgenda();
+    if (id === "diario") {
+      updateDiarioDateMax();
+      syncDiarioDateHero();
+      loadDiario();
+    }
+    if (id === "projetos") loadProjetosGrid();
+    if (id === "ajustes") syncThemeControls();
+  }
+
+  $("#ajuste-theme-light").addEventListener("click", () => applyTheme("light"));
+  $("#ajuste-theme-dark").addEventListener("click", () => applyTheme("dark"));
+
+  document.querySelectorAll(".nav-btn[data-section]").forEach((btn) => {
+    btn.addEventListener("click", () => navigateToSection(btn.getAttribute("data-section")));
+  });
+
+  function fillMonthSelect(sel) {
+    sel.innerHTML = MESES.map((m, i) => `<option value="${i + 1}">${m}</option>`).join("");
+  }
+
+  function fillYearSelect(sel, centerY) {
+    const ys = [];
+    for (let y = centerY - 3; y <= centerY + 4; y++) ys.push(y);
+    sel.innerHTML = ys.map((y) => `<option value="${y}">${y}</option>`).join("");
+  }
+
+  const today = new Date();
+  fillMonthSelect($("#dash-mes"));
+  fillMonthSelect($("#ag-mes"));
+  fillYearSelect($("#dash-ano"), today.getFullYear());
+  fillYearSelect($("#ag-ano"), today.getFullYear());
+  $("#dash-mes").value = String(today.getMonth() + 1);
+  $("#dash-ano").value = String(today.getFullYear());
+  $("#ag-mes").value = String(today.getMonth() + 1);
+  $("#ag-ano").value = String(today.getFullYear());
+
+  $("#modal-diario-categoria").innerHTML = CATEGORIAS.map((c) => `<option value="${c.v}">${c.l}</option>`).join("");
+
+  function categoriaLabelPt(c) {
+    const z = CATEGORIAS.find((x) => x.v === c);
+    return z ? z.l : String(c);
+  }
+
+  function pillCatClass(c) {
+    const m = {
+      reuniao: "pill-cat-reuniao",
+      desenvolvimento: "pill-cat-desenvolvimento",
+      planejamento: "pill-cat-planejamento",
+      suporte: "pill-cat-suporte",
+      documentacao: "pill-cat-documentacao",
+      outro: "pill-cat-outro",
+    };
+    return m[String(c)] || "pill-cat-outro";
+  }
+
+  function setDiarioTimeNow() {
+    const now = new Date();
+    $("#modal-diario-hora").value =
+      String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+  }
+
+  function isoDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function todayIso() {
+    return isoDate(new Date());
+  }
+
+  function parseISODateLocal(iso) {
+    const parts = String(iso || "").split("-").map(Number);
+    const y = parts[0];
+    const mo = parts[1];
+    const da = parts[2];
+    return new Date(y, mo - 1, da);
+  }
+
+  function updateDiarioDateMax() {
+    const inp = $("#diario-data");
+    const t = todayIso();
+    inp.max = t;
+    if (inp.value && inp.value > t) inp.value = t;
+  }
+
+  function syncDiarioDateHero() {
+    let iso = $("#diario-data").value || todayIso();
+    if (iso > todayIso()) iso = todayIso();
+    const d = parseISODateLocal(iso);
+    $("#diario-weekday").textContent = DIAS_SEMANA[d.getDay()] || "—";
+    const dd = d.getDate();
+    const mon = MESES[d.getMonth()];
+    const y = d.getFullYear();
+    $("#diario-date-long").innerHTML = `<em>${dd}</em> de ${mon} de ${y}`;
+    const nextBtn = $("#diario-next-day");
+    nextBtn.disabled = iso >= todayIso();
+  }
+
+  function shiftDiarioDay(delta) {
+    const cur = $("#diario-data").value || todayIso();
+    const d = parseISODateLocal(cur);
+    d.setDate(d.getDate() + delta);
+    const iso = isoDate(d);
+    const max = todayIso();
+    if (iso > max) return;
+    $("#diario-data").value = iso;
+    syncDiarioDateHero();
+    loadDiario();
+  }
+
+  async function loadDiario() {
+    updateDiarioDateMax();
+    let d = $("#diario-data").value;
+    if (!d) {
+      d = todayIso();
+      $("#diario-data").value = d;
+    }
+    if (d > todayIso()) {
+      d = todayIso();
+      $("#diario-data").value = d;
+    }
+    syncDiarioDateHero();
+    const pretty = d.split("-").reverse().join("/");
+    $("#diario-subtitle").textContent =
+      `Dia trabalhado: ${pretty}. Blocos por empresa; horário à esquerda. Use + na lista para incluir ocorrências.`;
+    const mount = $("#diario-board");
+    mount.innerHTML = `<p class="empty-hint">Carregando…</p>`;
+    try {
+      const data = await apiGet("/api/logs/dia/" + encodeURIComponent(d));
+      const logs = data.logs || [];
+      if (!logs.length) {
+        mount.innerHTML = `<p class="empty-hint">Nenhuma atividade registrada neste dia.</p>`;
+        return;
+      }
+      const byEmp = /** @type {Record<string, any[]>} */ ({});
+      for (const l of logs) {
+        const k = l.cliente_nome || "Sem empresa";
+        if (!byEmp[k]) byEmp[k] = [];
+        byEmp[k].push(l);
+      }
+      for (const k of Object.keys(byEmp)) {
+        byEmp[k].sort((a, b) => String(a.data_hora).localeCompare(String(b.data_hora)));
+      }
+      const empresas = Object.keys(byEmp).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const svgDiarioEdit = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+      const svgDiarioDel = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`;
+      mount.innerHTML = empresas
+        .map((emp) => {
+          const items = byEmp[emp];
+          let lastHour = /** @type {string | null} */ (null);
+          const rows = [];
+          for (const l of items) {
+            const t = (l.data_hora || "").slice(11, 16);
+            const hour = t.length >= 2 ? t.slice(0, 2) : "";
+            if (lastHour !== null && hour !== lastHour) {
+              rows.push('<div class="diario-hour-gap" aria-hidden="true"></div>');
+            }
+            lastHour = hour;
+            const cat = categoriaLabelPt(l.categoria);
+            const pc = pillCatClass(l.categoria);
+            const proj = escapeHtml(l.projeto_nome || "");
+            const desc = escapeHtml(l.descricao || "");
+            const mins = l.duracao_minutos;
+            const lid = l.id != null ? String(l.id) : "";
+            rows.push(`<div class="diario-row">
+              <div class="diario-row-time">${escapeHtml(t)}</div>
+              <div class="diario-row-main">
+                <div class="diario-row-top">
+                  <span class="pill-cat ${pc}">${escapeHtml(cat)}</span>
+                  <span class="diario-row-proj">${proj}</span>
+                </div>
+                <div class="diario-row-desc">${desc}</div>
+                <div class="diario-row-meta">${mins} min</div>
+              </div>
+              <div class="diario-row-actions">
+                <button type="button" class="diario-icon-btn diario-btn-edit" data-log-id="${escapeHtml(lid)}" title="Editar" aria-label="Editar atividade">${svgDiarioEdit}</button>
+                <button type="button" class="diario-icon-btn diario-btn-del" data-log-id="${escapeHtml(lid)}" title="Excluir" aria-label="Excluir atividade">${svgDiarioDel}</button>
+              </div>
+            </div>`);
+          }
+          return `<details class="diario-section" open>
+            <summary class="diario-section-head">
+              <span class="diario-section-icon">▼</span>
+              <span class="diario-section-title">${escapeHtml(emp)}</span>
+              <span class="diario-section-count">${items.length}</span>
+            </summary>
+            <div class="diario-rows-wrap">${rows.join("")}</div>
+          </details>`;
+        })
+        .join("");
+    } catch (e) {
+      mount.innerHTML = `<p class="empty-hint">Não foi possível carregar o diário.</p>`;
+      toast(e.message, true);
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function fillProjetoOptgroups(selectEl, preferredId) {
+    try {
+      const data = await apiGet("/api/projetos");
+      const projetos = data.projetos || [];
+      if (!projetos.length) {
+        selectEl.innerHTML = '<option value="">Nenhum projeto</option>';
+        return;
+      }
+      const byClient = /** @type {Record<string, typeof projetos>} */ ({});
+      for (const p of projetos) {
+        const cn = p.cliente_nome || "Outros";
+        if (!byClient[cn]) byClient[cn] = [];
+        byClient[cn].push(p);
+      }
+      const keys = Object.keys(byClient).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      selectEl.innerHTML = keys
+        .map((cn) => {
+          const opts = byClient[cn]
+            .slice()
+            .sort((a, b) =>
+              String(a.projeto_nome || "").localeCompare(String(b.projeto_nome || ""), "pt-BR")
+            )
+            .map((p) => `<option value="${p.id}">${escapeHtml(p.projeto_nome || "")}</option>`)
+            .join("");
+          return `<optgroup label="${escapeHtml(cn)}">${opts}</optgroup>`;
+        })
+        .join("");
+      if (preferredId != null && preferredId !== "") {
+        const v = String(preferredId);
+        if ([...selectEl.options].some((o) => o.value === v)) selectEl.value = v;
+      }
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  async function refreshProjetoSelects(prefId) {
+    await fillProjetoOptgroups($("#modal-diario-projeto"), prefId);
+  }
+
+  function consumeDiarioProjetoPrefill() {
+    const raw = localStorage.getItem(LS_PREFILL_PROJETO);
+    if (raw) localStorage.removeItem(LS_PREFILL_PROJETO);
+    return raw;
+  }
+
+  function timeFromDataHora(dh) {
+    const s = String(dh || "").trim().replace("T", " ");
+    return s.length >= 16 ? s.slice(11, 16) : "";
+  }
+
+  async function openDiarioModal() {
+    $("#modal-diario-log-id").value = "";
+    $("#modal-diario-title").textContent = "Nova ocorrência";
+    $("#modal-diario-submit").textContent = "Registrar no dia";
+    updateDiarioDateMax();
+    const pid = consumeDiarioProjetoPrefill();
+    await fillProjetoOptgroups($("#modal-diario-projeto"), pid);
+    setDiarioTimeNow();
+    $("#modal-diario-overlay").hidden = false;
+  }
+
+  async function openDiarioModalEdit(logId) {
+    updateDiarioDateMax();
+    try {
+      const row = await apiGet("/api/logs/" + encodeURIComponent(String(logId)));
+      $("#modal-diario-log-id").value = String(row.id);
+      $("#modal-diario-title").textContent = "Editar ocorrência";
+      $("#modal-diario-submit").textContent = "Salvar alterações";
+      await fillProjetoOptgroups($("#modal-diario-projeto"), row.projeto_id);
+      const tm = timeFromDataHora(row.data_hora);
+      $("#modal-diario-hora").value = tm || "09:00";
+      $("#modal-diario-duracao").value = String(row.duracao_minutos ?? "");
+      $("#modal-diario-categoria").value = row.categoria || "outro";
+      $("#modal-diario-desc").value = row.descricao || "";
+      $("#modal-diario-overlay").hidden = false;
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  function bindOverlayDismiss(overlaySel, closeSel) {
+    const ov = $(overlaySel);
+    $(closeSel).addEventListener("click", () => {
+      ov.hidden = true;
+    });
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) ov.hidden = true;
+    });
+  }
+
+  bindOverlayDismiss("#modal-diario-overlay", "#modal-diario-close");
+  bindOverlayDismiss("#modal-novo-proj-overlay", "#modal-novo-proj-close");
+  bindOverlayDismiss("#modal-projeto-overlay", "#modal-projeto-close");
+
+  $("#form-diario-modal").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const projeto_id = parseInt($("#modal-diario-projeto").value, 10);
+    const duracao_minutos = parseInt($("#modal-diario-duracao").value, 10);
+    const descricao = $("#modal-diario-desc").value.trim();
+    const categoria = $("#modal-diario-categoria").value;
+    const timeVal = $("#modal-diario-hora").value;
+    if (!timeVal) return toast("Informe o horário.", true);
+    const d = $("#diario-data").value || todayIso();
+    if (!d) return toast("Selecione o dia.", true);
+    if (d > todayIso()) return toast("Use apenas hoje ou dias anteriores.", true);
+    const body = {
+      projeto_id,
+      duracao_minutos,
+      descricao,
+      categoria,
+      data_hora: `${d} ${timeVal}:00`,
+    };
+    const logIdRaw = $("#modal-diario-log-id").value.trim();
+    try {
+      if (logIdRaw) {
+        await apiPut("/api/logs/" + encodeURIComponent(logIdRaw), body);
+        toast("Atividade atualizada.");
+      } else {
+        await apiPost("/api/logs", body);
+        toast("Atividade registrada.");
+      }
+      $("#modal-diario-log-id").value = "";
+      $("#modal-diario-desc").value = "";
+      $("#modal-diario-duracao").value = "";
+      $("#modal-diario-title").textContent = "Nova ocorrência";
+      $("#modal-diario-submit").textContent = "Registrar no dia";
+      $("#modal-diario-overlay").hidden = true;
+      setDiarioTimeNow();
+      await loadDiario();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  $("#diario-board").addEventListener("click", async (e) => {
+    const editBtn = /** @type {HTMLElement | null} */ (e.target.closest(".diario-btn-edit"));
+    const delBtn = /** @type {HTMLElement | null} */ (e.target.closest(".diario-btn-del"));
+    if (editBtn) {
+      const id = editBtn.getAttribute("data-log-id");
+      if (id) await openDiarioModalEdit(id);
+      return;
+    }
+    if (delBtn) {
+      const id = delBtn.getAttribute("data-log-id");
+      if (!id) return;
+      if (!confirm("Excluir esta atividade? Esta ação não pode ser desfeita.")) return;
+      try {
+        await apiDelete("/api/logs/" + encodeURIComponent(id));
+        toast("Atividade excluída.");
+        await loadDiario();
+      } catch (err) {
+        toast(err.message, true);
+      }
+    }
+  });
+
+  $("#diario-open-modal").addEventListener("click", () => openDiarioModal());
+
+  $("#diario-prev-day").addEventListener("click", () => shiftDiarioDay(-1));
+  $("#diario-next-day").addEventListener("click", () => shiftDiarioDay(1));
+
+  $("#diario-refresh").addEventListener("click", () => loadDiario());
+
+  let projetoModalId = /** @type {number | null} */ (null);
+
+  function formatBytes(n) {
+    const x = Number(n) || 0;
+    if (x < 1024) return `${x} B`;
+    if (x < 1024 * 1024) return `${(x / 1024).toFixed(1)} KB`;
+    return `${(x / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function formatDuracaoMinutos(m) {
+    const mm = Number(m) || 0;
+    const h = Math.floor(mm / 60);
+    const r = mm % 60;
+    if (h <= 0) return `${mm} min`;
+    return `${h} h ${r} min`;
+  }
+
+  async function loadProjetosGrid() {
+    const mount = $("#projetos-grid");
+    mount.innerHTML = `<p class="empty-hint" style="grid-column:1/-1;margin:0">Carregando…</p>`;
+    const svgFolderEdit = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+    const svgFolderDel = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`;
+    try {
+      const data = await apiGet("/api/projetos");
+      const list = data.projetos || [];
+      if (!list.length) {
+        mount.innerHTML = `<p class="empty-hint" style="grid-column:1/-1;margin:0">Nenhum projeto cadastrado. Use <strong>Novo projeto</strong>.</p>`;
+        return;
+      }
+      mount.innerHTML = list
+        .map((p) => {
+          const pid = p.id != null ? String(p.id) : "";
+          const pn = escapeHtml(p.projeto_nome || "");
+          return `
+      <article class="folder-card" data-projeto-id="${escapeHtml(pid)}" role="button" tabindex="0">
+        <div class="folder-card-actions">
+          <button type="button" class="folder-icon-btn folder-btn-edit" data-projeto-id="${escapeHtml(pid)}" title="Editar projeto" aria-label="Editar projeto">${svgFolderEdit}</button>
+          <button type="button" class="folder-icon-btn folder-btn-del" data-projeto-id="${escapeHtml(pid)}" data-projeto-nome="${pn}" title="Excluir projeto" aria-label="Excluir projeto">${svgFolderDel}</button>
+        </div>
+        <div class="folder-icon" aria-hidden="true">📁</div>
+        <h3 class="folder-name">${pn}</h3>
+        <div class="folder-client">${escapeHtml(p.cliente_nome || "")}</div>
+      </article>`;
+        })
+        .join("");
+    } catch (e) {
+      mount.innerHTML = `<p class="empty-hint" style="grid-column:1/-1;margin:0">Não foi possível carregar projetos.</p>`;
+      toast(e.message, true);
+    }
+  }
+
+  $("#projetos-grid").addEventListener("click", async (e) => {
+    const t = /** @type {HTMLElement} */ (e.target);
+    if (t.closest(".folder-btn-edit")) {
+      e.stopPropagation();
+      const id = t.closest(".folder-btn-edit").getAttribute("data-projeto-id");
+      if (id) await openProjetoFormModalEdit(id);
+      return;
+    }
+    if (t.closest(".folder-btn-del")) {
+      e.stopPropagation();
+      const btn = t.closest(".folder-btn-del");
+      const id = btn && btn.getAttribute("data-projeto-id");
+      const nome = (btn && btn.getAttribute("data-projeto-nome")) || "este projeto";
+      if (!id) return;
+      if (
+        !confirm(
+          `Excluir o projeto "${nome}"?\n\nSerão removidos também os registros do diário, agenda e anexos ligados a ele no banco de dados.`
+        )
+      )
+        return;
+      try {
+        await apiDelete("/api/projetos/" + encodeURIComponent(id));
+        toast("Projeto excluído.");
+        if (!$("#modal-projeto-overlay").hidden && projetoModalId === Number(id)) {
+          $("#modal-projeto-overlay").hidden = true;
+        }
+        await refreshProjetoSelects();
+        await loadProjetosGrid();
+      } catch (err) {
+        toast(err.message, true);
+      }
+      return;
+    }
+    const card = t.closest(".folder-card");
+    if (card && card.getAttribute("data-projeto-id")) {
+      openProjetoModal(Number(card.getAttribute("data-projeto-id")));
+    }
+  });
+
+  $("#projetos-grid").addEventListener("keydown", (e) => {
+    const card = /** @type {HTMLElement | null} */ ((/** @type {HTMLElement} */ (e.target)).closest(".folder-card"));
+    if (!card || (e.key !== "Enter" && e.key !== " ")) return;
+    if ((/** @type {HTMLElement} */ (e.target)).closest(".folder-card-actions")) return;
+    e.preventDefault();
+    const id = card.getAttribute("data-projeto-id");
+    if (id) openProjetoModal(Number(id));
+  });
+
+  async function openProjetoModal(projetoId) {
+    projetoModalId = projetoId;
+    const overlay = $("#modal-projeto-overlay");
+    const body = $("#modal-projeto-body");
+    const title = $("#modal-projeto-title");
+    overlay.hidden = false;
+    body.innerHTML = `<p class="empty-hint" style="margin:0">Carregando…</p>`;
+    try {
+      const [det, act, anx] = await Promise.all([
+        apiGet(`/api/projetos/${projetoId}`),
+        apiGet(`/api/projetos/${projetoId}/atividades`),
+        apiGet(`/api/projetos/${projetoId}/anexos`),
+      ]);
+      const p = det.projeto;
+      title.textContent = p.projeto_nome || "Projeto";
+      const totalMin = Number(p.total_minutos) || 0;
+      const atividades = act.atividades || [];
+      const anexos = anx.anexos || [];
+
+      const hist = atividades.length
+        ? atividades
+            .map((a) => {
+              const when = String(a.data_hora || "").replace("T", " ").slice(0, 16);
+              const cat = categoriaLabelPt(a.categoria);
+              return `<div class="projeto-atividade-item">
+            <div><strong>${escapeHtml(when)}</strong> · ${escapeHtml(cat)} · ${escapeHtml(String(a.duracao_minutos))} min</div>
+            <div>${escapeHtml(a.descricao || "")}</div>
+            <div class="projeto-atividade-meta">${escapeHtml(a.cliente_nome || "")}</div>
+          </div>`;
+            })
+            .join("")
+        : `<p class="empty-hint" style="margin:0">Nenhuma atividade registrada ainda.</p>`;
+
+      const anexList = anexos.length
+        ? anexos
+            .map((x) => {
+              const u = String(x.url || "");
+              return `<div class="anexo-row">
+          <a href="${u}" target="_blank" rel="noopener noreferrer">${escapeHtml(x.nome_original || "")}</a>
+          <span style="font-size:0.74rem;color:var(--text-muted)">${formatBytes(x.tamanho_bytes)}</span>
+        </div>`;
+            })
+            .join("")
+        : `<p class="empty-hint" style="margin:0">Nenhum anexo.</p>`;
+
+      const ativoBadge = p.ativo
+        ? `<span style="font-size:0.72rem;font-weight:600;padding:0.22rem 0.55rem;border-radius:6px;background:rgba(68,131,97,0.22);color:#166534">Ativo</span>`
+        : `<span style="font-size:0.72rem;font-weight:600;padding:0.22rem 0.55rem;border-radius:6px;background:rgba(107,114,128,0.2);color:#4b5563">Inativo</span>`;
+
+      body.innerHTML = `
+      <p style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--text-muted)">${escapeHtml(p.cliente_nome || "")}</p>
+      <div class="toolbar" style="margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem;align-items:center">
+        <button type="button" class="btn btn-primary" id="projeto-go-diario">Ir ao Diário</button>
+        ${ativoBadge}
+      </div>
+      <div class="projeto-stat-row">
+        <div class="projeto-stat"><span>Tempo total</span><strong>${escapeHtml(formatDuracaoMinutos(totalMin))}</strong></div>
+        <div class="projeto-stat"><span>Atividades</span><strong>${escapeHtml(String(p.total_atividades ?? atividades.length))}</strong></div>
+      </div>
+      <h4 class="card-title" style="margin:0 0 0.5rem">Histórico cronológico</h4>
+      <div style="margin-bottom:1.25rem">${hist}</div>
+      <h4 class="card-title" style="margin:0 0 0.5rem">Anexos</h4>
+      <div style="margin-bottom:0.75rem">${anexList}</div>
+      <form id="form-projeto-anexo" style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:flex-end">
+        <div style="flex:1;min-width:200px">
+          <label class="field-label" for="projeto-anexo-file">Enviar arquivo</label>
+          <input id="projeto-anexo-file" type="file" class="input" style="padding:0.4rem" />
+        </div>
+        <button type="submit" class="btn btn-ghost">Anexar</button>
+      </form>`;
+    } catch (e) {
+      body.innerHTML = `<p class="empty-hint">Não foi possível carregar o projeto.</p>`;
+      toast(e.message, true);
+    }
+  }
+
+  $("#modal-projeto-overlay").addEventListener("click", (e) => {
+    const t = e.target;
+    if (t && /** @type {HTMLElement} */ (t).id === "projeto-go-diario" && projetoModalId != null) {
+      e.preventDefault();
+      localStorage.setItem(LS_PREFILL_PROJETO, String(projetoModalId));
+      $("#modal-projeto-overlay").hidden = true;
+      navigateToSection("diario");
+      toast("Projeto pré-selecionado. Toque em + na lista para registrar.");
+    }
+  });
+
+  $("#modal-projeto-overlay").addEventListener("submit", async (e) => {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement) || form.id !== "form-projeto-anexo") return;
+    e.preventDefault();
+    const pid = projetoModalId;
+    if (pid == null) return;
+    const fi = $("#projeto-anexo-file");
+    if (!fi.files || !fi.files[0]) return toast("Escolha um arquivo.", true);
+    const fd = new FormData();
+    fd.append("arquivo", fi.files[0]);
+    try {
+      await apiPostForm(`/api/projetos/${pid}/anexos`, fd);
+      toast("Anexo enviado.");
+      fi.value = "";
+      await openProjetoModal(pid);
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  async function loadClientesIntoSelect(selEl, preferredId) {
+    const data = await apiGet("/api/clientes");
+    const arr = data.clientes || [];
+    selEl.innerHTML = arr.length
+      ? arr.map((c) => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("")
+      : '<option value="">Nenhuma empresa — use “Nova empresa”</option>';
+    selEl.required = arr.length > 0;
+    if (preferredId != null && preferredId !== "") {
+      const v = String(preferredId);
+      if ([...selEl.options].some((o) => o.value === v)) selEl.value = v;
+    }
+  }
+
+  function resetProjetoFormModal() {
+    $("#novo-proj-edit-id").value = "";
+    $("#novo-proj-nome").value = "";
+    $("#novo-proj-ativo").checked = true;
+    $("#modal-novo-proj-title").textContent = "Novo projeto";
+    $("#novo-proj-submit").textContent = "Criar projeto";
+    $("#novo-cliente-inline-wrap").hidden = true;
+    $("#novo-cliente-inline-nome").value = "";
+  }
+
+  async function openProjetoFormModalCreate() {
+    resetProjetoFormModal();
+    try {
+      await loadClientesIntoSelect($("#novo-proj-cliente"), null);
+      $("#modal-novo-proj-overlay").hidden = false;
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  async function openProjetoFormModalEdit(projetoId) {
+    resetProjetoFormModal();
+    $("#novo-proj-edit-id").value = String(projetoId);
+    $("#modal-novo-proj-title").textContent = "Editar projeto";
+    $("#novo-proj-submit").textContent = "Salvar alterações";
+    try {
+      const det = await apiGet(`/api/projetos/${encodeURIComponent(String(projetoId))}`);
+      const p = det.projeto;
+      await loadClientesIntoSelect($("#novo-proj-cliente"), p.cliente_id);
+      $("#novo-proj-nome").value = p.projeto_nome || "";
+      $("#novo-proj-ativo").checked = !!p.ativo;
+      $("#modal-novo-proj-overlay").hidden = false;
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  $("#btn-novo-projeto").addEventListener("click", () => openProjetoFormModalCreate());
+
+  $("#btn-toggle-nova-empresa").addEventListener("click", () => {
+    const w = $("#novo-cliente-inline-wrap");
+    w.hidden = !w.hidden;
+    if (!w.hidden) $("#novo-cliente-inline-nome").focus();
+  });
+
+  $("#btn-salvar-cliente-inline").addEventListener("click", async () => {
+    const nome = $("#novo-cliente-inline-nome").value.trim();
+    if (!nome) return toast("Informe o nome da empresa.", true);
+    try {
+      const row = await apiPost("/api/clientes", { nome });
+      await loadClientesIntoSelect($("#novo-proj-cliente"), row.id);
+      $("#novo-cliente-inline-nome").value = "";
+      $("#novo-cliente-inline-wrap").hidden = true;
+      toast("Empresa cadastrada.");
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  $("#form-novo-projeto").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const editId = $("#novo-proj-edit-id").value.trim();
+    const clienteRaw = $("#novo-proj-cliente").value;
+    const cliente_id = parseInt(clienteRaw, 10);
+    const nome = $("#novo-proj-nome").value.trim();
+    const ativo = $("#novo-proj-ativo").checked;
+    if (!nome) return toast("Informe o nome do projeto.", true);
+    if (!clienteRaw || Number.isNaN(cliente_id)) return toast("Selecione ou cadastre uma empresa.", true);
+    try {
+      /** @type {number | null} */
+      let prefDiarioProjeto = null;
+      if (editId) {
+        await apiPut("/api/projetos/" + encodeURIComponent(editId), { cliente_id, nome, ativo });
+        toast("Projeto atualizado.");
+        prefDiarioProjeto = Number(editId);
+      } else {
+        const created = await apiPost("/api/projetos", { cliente_id, nome, ativo });
+        toast("Projeto criado.");
+        prefDiarioProjeto = created && created.id != null ? Number(created.id) : null;
+      }
+      $("#modal-novo-proj-overlay").hidden = true;
+      resetProjetoFormModal();
+      await refreshProjetoSelects(prefDiarioProjeto);
+      await loadProjetosGrid();
+      if (editId && projetoModalId === Number(editId)) await openProjetoModal(Number(editId));
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  /* —— Relatório —— */
+  $("#rep-data").value = isoDate(today);
+  updateDiarioDateMax();
+  $("#diario-data").value = todayIso();
+  syncDiarioDateHero();
+  $("#diario-data").addEventListener("change", () => {
+    updateDiarioDateMax();
+    let v = $("#diario-data").value;
+    const max = todayIso();
+    if (v > max) $("#diario-data").value = max;
+    syncDiarioDateHero();
+    loadDiario();
+  });
+
+  $("#rep-load").addEventListener("click", async () => {
+    const d = $("#rep-data").value;
+    if (!d) return toast("Escolha uma data.", true);
+    try {
+      const data = await apiGet("/api/relatorio_diario/" + encodeURIComponent(d));
+      const lines = data.bullets || [];
+      $("#rep-text").value = lines.length ? lines.join("\n") : `Sem registros em ${d}.`;
+      toast("Relatório carregado.");
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  $("#rep-copy").addEventListener("click", async () => {
+    const t = $("#rep-text").value;
+    try {
+      await navigator.clipboard.writeText(t);
+      toast("Copiado para a área de transferência.");
+    } catch {
+      toast("Não foi possível copiar automaticamente.", true);
+    }
+  });
+
+  /* —— Agenda —— */
+  function pillClass(st) {
+    const m = { pendente: "pill-pendente", concluido: "pill-concluido", cancelado: "pill-cancelado", adiado: "pill-adiado" };
+    return m[st] || "pill-cancelado";
+  }
+
+  async function loadAgenda() {
+    const mes = $("#ag-mes").value;
+    const ano = $("#ag-ano").value;
+    const mount = $("#agenda-mount");
+    mount.innerHTML = `<p class="empty-hint">Carregando…</p>`;
+    try {
+      const data = await apiGet(`/api/agenda?mes=${encodeURIComponent(mes)}&ano=${encodeURIComponent(ano)}`);
+      const items = data.agenda || [];
+      if (!items.length) {
+        mount.innerHTML = `<p class="empty-hint">Nada agendado neste mês.</p>`;
+        return;
+      }
+      mount.innerHTML = items
+        .map((a) => {
+          const when = a.data_hora_agendada || "";
+          const proj = escapeHtml(a.projeto_nome || "");
+          const cli = escapeHtml(a.cliente_nome || "");
+          const tit = escapeHtml(a.titulo || "");
+          const desc = a.descricao ? `<div class="agenda-meta">${escapeHtml(a.descricao)}</div>` : "";
+          const st = escapeHtml(a.status || "");
+          return `
+            <article class="agenda-card">
+              <div class="check" aria-hidden="true"></div>
+              <div class="body">
+                <div class="title-row">
+                  <h3>${tit}</h3>
+                  <span class="pill ${pillClass(a.status)}">${st}</span>
+                </div>
+                <div class="agenda-meta">${when} · ${proj} <span style="opacity:.75">(${cli})</span></div>
+                ${desc}
+              </div>
+            </article>`;
+        })
+        .join("");
+      toast("Agenda atualizada.");
+    } catch (e) {
+      mount.innerHTML = `<p class="empty-hint">Falha ao carregar agenda.</p>`;
+      toast(e.message, true);
+    }
+  }
+  $("#ag-refresh").addEventListener("click", loadAgenda);
+
+  /* —— Charts —— */
+  const palette = ["#2383e2", "#9065b0", "#d9730d", "#448361", "#cb912f", "#e255a1", "#6b6b6b"];
+
+  let chartProj = null;
+  let chartWeek = null;
+
+  function destroyChart(c) {
+    if (c) {
+      c.destroy();
+      c = null;
+    }
+    return null;
+  }
+
+  async function loadDashboard() {
+    const mes = $("#dash-mes").value;
+    const ano = $("#dash-ano").value;
+    try {
+      const ct = getChartTheme();
+      const q = `?mes=${encodeURIComponent(mes)}&ano=${encodeURIComponent(ano)}`;
+      const data = await apiGet("/api/dashboard/stats" + q);
+
+      const hp = (data.horas_por_projeto || []).filter((x) => x.minutos_total > 0);
+      const labelsP = hp.map((x) => `${x.projeto_nome}`);
+      const valsP = hp.map((x) => Number(x.horas) || 0);
+
+      const ctxP = $("#chart-projetos").getContext("2d");
+      chartProj = destroyChart(chartProj);
+      chartProj = new Chart(ctxP, {
+        type: "doughnut",
+        data: {
+          labels: labelsP.length ? labelsP : ["Sem dados"],
+          datasets: [
+            {
+              data: labelsP.length ? valsP : [1],
+              backgroundColor: labelsP.length ? palette : ["#e3e2e0"],
+              borderWidth: 2,
+              borderColor: ct.doughnutBorder,
+              hoverOffset: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 12,
+                font: { family: "Inter" },
+                color: ct.legend,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const h = ctx.raw || 0;
+                  return ` ${ctx.label}: ${h} h`;
+                },
+              },
+            },
+          },
+          cutout: "58%",
+        },
+      });
+
+      const serie = (data.evolucao_ultimos_7_dias && data.evolucao_ultimos_7_dias.serie_diaria) || [];
+      const labelsW = serie.map((d) => {
+        const [yy, mm, dd] = d.data.split("-");
+        return `${dd}/${mm}`;
+      });
+      const valsW = serie.map((d) => Number(d.horas) || 0);
+
+      const accentRgb = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2383e2";
+
+      const ctxW = $("#chart-semana").getContext("2d");
+      chartWeek = destroyChart(chartWeek);
+      chartWeek = new Chart(ctxW, {
+        type: "bar",
+        data: {
+          labels: labelsW.length ? labelsW : ["—"],
+          datasets: [
+            {
+              label: "Horas",
+              data: labelsW.length ? valsW : [0],
+              borderRadius: 8,
+              backgroundColor:
+                accentRgb.startsWith("#") && accentRgb.length >= 7
+                  ? `${accentRgb}59`
+                  : "rgba(35, 131, 226, 0.35)",
+              borderColor: accentRgb.startsWith("#") ? accentRgb : "#2383e2",
+              borderWidth: 1.5,
+              maxBarThickness: 44,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: "Inter" }, color: ct.ticks },
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: ct.grid },
+              ticks: { font: { family: "Inter" }, color: ct.ticks },
+              title: { display: true, text: "Horas", color: ct.axis },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.parsed.y} h`,
+              },
+            },
+          },
+        },
+      });
+
+      toast("Dashboard atualizado.");
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  $("#dash-refresh").addEventListener("click", loadDashboard);
+  $("#dash-mes").addEventListener("change", loadDashboard);
+  $("#dash-ano").addEventListener("change", loadDashboard);
+
+  setupBellPanel();
+  bootstrapNotifications();
+  refreshProjetoSelects();
+  setDiarioTimeNow();
+  syncThemeControls();
+})();
+  </script>
+</body>
+</html>
