@@ -9,6 +9,7 @@ do repositório em sys.path (feito abaixo). Preferível na raiz: `python run.py`
 from __future__ import annotations
 
 import calendar
+import os
 import re
 import sys
 import uuid
@@ -25,10 +26,11 @@ if str(PROJECT_ROOT) not in sys.path:
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 ICONS_DIR = FRONTEND_DIR / "icons"
 UPLOADS_DIR = PROJECT_ROOT / "uploads"
+IMAGENS_DIR = PROJECT_ROOT / "imagens"
 
 try:
     import mysql.connector
-    from flask import Flask, jsonify, request, send_from_directory
+    from flask import Flask, jsonify, redirect, request, Response, send_from_directory, session
     from flask_cors import CORS
     from mysql.connector import Error
 except ModuleNotFoundError:
@@ -41,18 +43,53 @@ except ModuleNotFoundError:
     )
     raise SystemExit(1) from None
 
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from backend.config import DB_CONFIG_BASE, DB_NAME
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
-CORS(app)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "pm-controller-dev-secret-altere-em-producao")
+app.permanent_session_lifetime = timedelta(days=14)
+CORS(app, supports_credentials=True)
 
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+@app.before_request
+def _require_login_api() -> Any:
+    path = request.path or ""
+    if path.startswith("/uploads/") and not session.get("user_id"):
+        return jsonify({"erro": "Não autenticado", "auth": True}), 401
+    if not path.startswith("/api/"):
+        return None
+    if path == "/api/auth/login" and request.method == "POST":
+        return None
+    if not session.get("user_id"):
+        return jsonify({"erro": "Não autenticado", "auth": True}), 401
+    return None
+
+
 @app.route("/")
 def index_page():
+    if not session.get("user_id"):
+        return redirect("/login.html")
     return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/index.html")
+def index_html_alias():
+    if not session.get("user_id"):
+        return redirect("/login.html")
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/login.html")
+@app.route("/login")
+def login_page():
+    if session.get("user_id"):
+        return redirect("/")
+    return send_from_directory(FRONTEND_DIR, "login.html")
 
 
 @app.route("/manifest.json")
@@ -76,10 +113,19 @@ def icons(filename: str):
     return send_from_directory(ICONS_DIR, filename, mimetype="image/png")
 
 
+@app.route("/imagens/<path:filename>")
+def imagens(filename: str) -> Any:
+    if ".." in filename or filename.startswith(("/", "\\")):
+        return jsonify({"erro": "caminho inválido"}), 400
+    return send_from_directory(IMAGENS_DIR, filename)
+
+
 LOG_CATEGORIAS = frozenset(
     {"reuniao", "desenvolvimento", "planejamento", "suporte", "documentacao", "outro"}
 )
 AGENDA_STATUS = frozenset({"pendente", "concluido", "cancelado", "adiado"})
+AVATAR_MAX_BYTES = 2 * 1024 * 1024
+AVATAR_MIMES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -174,6 +220,119 @@ def parse_datetime_optional(value: Any) -> datetime | None:
     if value is None or value == "":
         return None
     return parse_datetime_log(value)
+
+
+def _as_datetime(val: Any) -> datetime:
+    if isinstance(val, datetime):
+        return val
+    return parse_datetime_log(val)
+
+
+def log_interval_end(start: datetime, fim_raw: Any, duracao_minutos: int) -> datetime:
+    if fim_raw is not None:
+        return _as_datetime(fim_raw)
+    return start + timedelta(minutes=int(duracao_minutos))
+
+
+def intervals_overlap(start_a: datetime, end_a: datetime, start_b: datetime, end_b: datetime) -> bool:
+    """Sobreposição se intervalos se cruzam (contíguos 12:00–13:00 e 13:00–14:00 não sobrepõem)."""
+    return start_a < end_b and start_b < end_a
+
+
+def resolve_log_interval_from_payload(
+    payload: dict[str, Any],
+) -> tuple[datetime, datetime, int]:
+    """
+    Retorna (início, fim, duração em minutos).
+    Aceita data_hora + data_hora_fim (preferencial) ou data_hora + duracao_minutos (legado).
+    """
+    try:
+        start = parse_datetime_log(payload.get("data_hora"))
+    except ValueError as e:
+        raise ValueError(str(e)) from e
+
+    fim_raw = payload.get("data_hora_fim")
+    dur_raw = payload.get("duracao_minutos")
+
+    if fim_raw not in (None, ""):
+        end = parse_datetime_log(fim_raw)
+        if end <= start:
+            raise ValueError("data_hora_fim deve ser posterior ao início")
+        if start.date() != end.date():
+            raise ValueError("início e fim devem ser no mesmo dia")
+        delta_min = int((end - start).total_seconds() // 60)
+        if delta_min < 1:
+            raise ValueError("intervalo deve ter pelo menos 1 minuto")
+        return start, end, delta_min
+
+    if dur_raw is None:
+        raise ValueError("informe data_hora_fim (término) ou duracao_minutos")
+    try:
+        duracao_minutos = int(dur_raw)
+    except (TypeError, ValueError) as e:
+        raise ValueError("duracao_minutos deve ser inteiro") from e
+    if duracao_minutos < 1:
+        raise ValueError("duração deve ser de pelo menos 1 minuto")
+    end = start + timedelta(minutes=duracao_minutos)
+    return start, end, duracao_minutos
+
+
+def log_overlaps_existing(
+    cur: Any,
+    day_str: str,
+    start: datetime,
+    end: datetime,
+    exclude_id: int | None = None,
+) -> bool:
+    cur.execute(
+        """
+        SELECT id, data_hora, data_hora_fim, duracao_minutos
+        FROM logs_diarios
+        WHERE DATE(data_hora) = %s
+        """,
+        (day_str,),
+    )
+    for r in cur.fetchall():
+        rid = int(r["id"])
+        if exclude_id is not None and rid == exclude_id:
+            continue
+        s = r["data_hora"]
+        if not isinstance(s, datetime):
+            s = parse_datetime_log(str(s))
+        e = r["data_hora_fim"]
+        if e is not None and not isinstance(e, datetime):
+            e = parse_datetime_log(str(e))
+        e_dt = log_interval_end(s, e, int(r["duracao_minutos"]))
+        if intervals_overlap(start, end, s, e_dt):
+            return True
+    return False
+
+
+def last_end_same_projeto_same_day(
+    cur: Any, projeto_id: int, day_str: str, exclude_id: int | None
+) -> datetime | None:
+    """Maior data_hora_fim (fim do intervalo) entre logs do mesmo projeto no mesmo dia."""
+    cur.execute(
+        """
+        SELECT id, data_hora, data_hora_fim, duracao_minutos
+        FROM logs_diarios
+        WHERE projeto_id = %s AND DATE(data_hora) = %s
+        """,
+        (projeto_id, day_str),
+    )
+    best: datetime | None = None
+    for r in cur.fetchall():
+        rid = int(r["id"])
+        if exclude_id is not None and rid == exclude_id:
+            continue
+        s = r["data_hora"]
+        if not isinstance(s, datetime):
+            s = parse_datetime_log(str(s))
+        e_raw = r.get("data_hora_fim")
+        e_dt = log_interval_end(s, e_raw, int(r["duracao_minutos"]))
+        if best is None or e_dt > best:
+            best = e_dt
+    return best
 
 
 @app.route("/api/clientes", methods=["GET", "POST"])
@@ -426,6 +585,7 @@ def api_projeto_atividades(projeto_id: int) -> Any:
                 l.id,
                 l.projeto_id,
                 l.data_hora,
+                l.data_hora_fim,
                 l.categoria,
                 l.descricao,
                 l.duracao_minutos,
@@ -559,26 +719,24 @@ def api_logs_post() -> Any:
     projeto_id = payload.get("projeto_id")
     categoria = payload.get("categoria", "outro")
     descricao = payload.get("descricao")
-    duracao = payload.get("duracao_minutos")
 
-    if projeto_id is None or descricao is None or duracao is None:
-        return jsonify({"erro": "projeto_id, descricao e duracao_minutos são obrigatórios"}), 400
+    if projeto_id is None or descricao is None:
+        return jsonify({"erro": "projeto_id e descricao são obrigatórios"}), 400
     try:
         projeto_id = int(projeto_id)
-        duracao_minutos = int(duracao)
     except (TypeError, ValueError):
-        return jsonify({"erro": "projeto_id e duracao_minutos devem ser inteiros"}), 400
-    if duracao_minutos < 0:
-        return jsonify({"erro": "duracao_minutos não pode ser negativo"}), 400
+        return jsonify({"erro": "projeto_id deve ser inteiro"}), 400
 
     categoria = str(categoria).lower().strip()
     if categoria not in LOG_CATEGORIAS:
         return jsonify({"erro": f"categoria deve ser uma de: {sorted(LOG_CATEGORIAS)}"}), 400
 
     try:
-        data_hora = parse_datetime_log(payload.get("data_hora"))
+        data_hora, data_hora_fim, duracao_minutos = resolve_log_interval_from_payload(payload)
     except ValueError as e:
         return jsonify({"erro": str(e)}), 400
+
+    day_str = data_hora.date().isoformat()
 
     conn = connect_db()
     try:
@@ -587,12 +745,25 @@ def api_logs_post() -> Any:
         if cur.fetchone() is None:
             return jsonify({"erro": "projeto_id não encontrado"}), 404
 
+        if log_overlaps_existing(cur, day_str, data_hora, data_hora_fim, None):
+            return jsonify(
+                {"erro": "Este horário se sobrepõe a outra ocorrência do dia. Ajuste início ou fim."}
+            ), 409
+
+        last_same = last_end_same_projeto_same_day(cur, projeto_id, day_str, None)
+        if last_same is not None and data_hora < last_same:
+            return jsonify(
+                {
+                    "erro": "O início deve ser no ou após o término da última atividade deste projeto neste dia."
+                }
+            ), 400
+
         cur.execute(
             """
-            INSERT INTO logs_diarios (projeto_id, data_hora, categoria, descricao, duracao_minutos)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO logs_diarios (projeto_id, data_hora, data_hora_fim, categoria, descricao, duracao_minutos)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (projeto_id, data_hora, categoria, descricao, duracao_minutos),
+            (projeto_id, data_hora, data_hora_fim, categoria, descricao, duracao_minutos),
         )
         conn.commit()
         novo_id = cur.lastrowid
@@ -601,6 +772,7 @@ def api_logs_post() -> Any:
                 "id": novo_id,
                 "projeto_id": projeto_id,
                 "data_hora": data_hora.isoformat(sep=" "),
+                "data_hora_fim": data_hora_fim.isoformat(sep=" "),
                 "categoria": categoria,
                 "descricao": descricao,
                 "duracao_minutos": duracao_minutos,
@@ -608,7 +780,15 @@ def api_logs_post() -> Any:
         ), 201
     except Error as e:
         conn.rollback()
-        return jsonify({"erro": str(e)}), 500
+        err = str(e)
+        if "Unknown column" in err and "data_hora_fim" in err:
+            return jsonify(
+                {
+                    "erro": "Coluna data_hora_fim ausente no banco. Execute: python -m backend.criar_banco",
+                }
+            ),
+            500
+        return jsonify({"erro": err}), 500
     finally:
         conn.close()
 
@@ -628,6 +808,7 @@ def api_logs_dia(data: str) -> Any:
                 l.id,
                 l.projeto_id,
                 l.data_hora,
+                l.data_hora_fim,
                 l.categoria,
                 l.descricao,
                 l.duracao_minutos,
@@ -645,6 +826,7 @@ def api_logs_dia(data: str) -> Any:
         out: list[dict[str, Any]] = []
         for r in rows:
             dh = r["data_hora"]
+            dh_f = r.get("data_hora_fim")
             out.append(
                 {
                     "id": r["id"],
@@ -652,6 +834,9 @@ def api_logs_dia(data: str) -> Any:
                     "projeto_nome": r["projeto_nome"],
                     "cliente_nome": r["cliente_nome"],
                     "data_hora": dh.isoformat(sep=" ") if isinstance(dh, datetime) else str(dh),
+                    "data_hora_fim": dh_f.isoformat(sep=" ")
+                    if dh_f is not None and isinstance(dh_f, datetime)
+                    else (str(dh_f) if dh_f is not None else None),
                     "categoria": str(r["categoria"]),
                     "descricao": r["descricao"],
                     "duracao_minutos": int(r["duracao_minutos"]),
@@ -676,6 +861,7 @@ def api_log_item(log_id: int) -> Any:
                     l.id,
                     l.projeto_id,
                     l.data_hora,
+                    l.data_hora_fim,
                     l.categoria,
                     l.descricao,
                     l.duracao_minutos,
@@ -692,6 +878,7 @@ def api_log_item(log_id: int) -> Any:
             if row is None:
                 return jsonify({"erro": "registro não encontrado"}), 404
             dh = row["data_hora"]
+            dh_f = row.get("data_hora_fim")
             return jsonify(
                 {
                     "id": row["id"],
@@ -699,6 +886,9 @@ def api_log_item(log_id: int) -> Any:
                     "projeto_nome": row["projeto_nome"],
                     "cliente_nome": row["cliente_nome"],
                     "data_hora": dh.isoformat(sep=" ") if isinstance(dh, datetime) else str(dh),
+                    "data_hora_fim": dh_f.isoformat(sep=" ")
+                    if dh_f is not None and isinstance(dh_f, datetime)
+                    else (str(dh_f) if dh_f is not None else None),
                     "categoria": str(row["categoria"]),
                     "descricao": row["descricao"],
                     "duracao_minutos": int(row["duracao_minutos"]),
@@ -732,26 +922,24 @@ def api_log_item(log_id: int) -> Any:
     projeto_id = payload.get("projeto_id")
     categoria = payload.get("categoria", "outro")
     descricao = payload.get("descricao")
-    duracao = payload.get("duracao_minutos")
 
-    if projeto_id is None or descricao is None or duracao is None:
-        return jsonify({"erro": "projeto_id, descricao e duracao_minutos são obrigatórios"}), 400
+    if projeto_id is None or descricao is None:
+        return jsonify({"erro": "projeto_id e descricao são obrigatórios"}), 400
     try:
         projeto_id = int(projeto_id)
-        duracao_minutos = int(duracao)
     except (TypeError, ValueError):
-        return jsonify({"erro": "projeto_id e duracao_minutos devem ser inteiros"}), 400
-    if duracao_minutos < 0:
-        return jsonify({"erro": "duracao_minutos não pode ser negativo"}), 400
+        return jsonify({"erro": "projeto_id deve ser inteiro"}), 400
 
     categoria = str(categoria).lower().strip()
     if categoria not in LOG_CATEGORIAS:
         return jsonify({"erro": f"categoria deve ser uma de: {sorted(LOG_CATEGORIAS)}"}), 400
 
     try:
-        data_hora = parse_datetime_log(payload.get("data_hora"))
+        data_hora, data_hora_fim, duracao_minutos = resolve_log_interval_from_payload(payload)
     except ValueError as e:
         return jsonify({"erro": str(e)}), 400
+
+    day_str = data_hora.date().isoformat()
 
     conn = connect_db()
     try:
@@ -763,13 +951,26 @@ def api_log_item(log_id: int) -> Any:
         if cur.fetchone() is None:
             return jsonify({"erro": "projeto_id não encontrado"}), 404
 
+        if log_overlaps_existing(cur, day_str, data_hora, data_hora_fim, log_id):
+            return jsonify(
+                {"erro": "Este horário se sobrepõe a outra ocorrência do dia. Ajuste início ou fim."}
+            ), 409
+
+        last_same = last_end_same_projeto_same_day(cur, projeto_id, day_str, log_id)
+        if last_same is not None and data_hora < last_same:
+            return jsonify(
+                {
+                    "erro": "O início deve ser no ou após o término da última atividade deste projeto neste dia."
+                }
+            ), 400
+
         cur.execute(
             """
             UPDATE logs_diarios
-            SET projeto_id = %s, data_hora = %s, categoria = %s, descricao = %s, duracao_minutos = %s
+            SET projeto_id = %s, data_hora = %s, data_hora_fim = %s, categoria = %s, descricao = %s, duracao_minutos = %s
             WHERE id = %s
             """,
-            (projeto_id, data_hora, categoria, descricao, duracao_minutos, log_id),
+            (projeto_id, data_hora, data_hora_fim, categoria, descricao, duracao_minutos, log_id),
         )
         conn.commit()
         return jsonify(
@@ -777,6 +978,7 @@ def api_log_item(log_id: int) -> Any:
                 "id": log_id,
                 "projeto_id": projeto_id,
                 "data_hora": data_hora.isoformat(sep=" "),
+                "data_hora_fim": data_hora_fim.isoformat(sep=" "),
                 "categoria": categoria,
                 "descricao": descricao,
                 "duracao_minutos": duracao_minutos,
@@ -1054,9 +1256,233 @@ def api_agenda() -> Any:
         conn.close()
 
 
-if __name__ == "__main__":
-    import os
+def _user_public_dict(row: dict[str, Any]) -> dict[str, Any]:
+    raw_tem = row.get("tem_avatar")
+    if raw_tem is None:
+        ab = row.get("avatar_blob")
+        if isinstance(ab, (bytes, bytearray)):
+            tem = len(ab) > 0
+        else:
+            tem = False
+    else:
+        try:
+            tem = int(raw_tem) != 0
+        except (TypeError, ValueError):
+            tem = bool(raw_tem)
+    return {
+        "id": int(row["id"]),
+        "username": row.get("username") or "",
+        "nome_exibicao": row.get("nome_exibicao") or "",
+        "email": row.get("email") or "",
+        "telefone": row.get("telefone") or "",
+        "cargo": row.get("cargo") or "",
+        "bio": row.get("bio") or "",
+        "tem_avatar": tem,
+    }
 
+
+_USER_ROW_SELECT = """
+    SELECT id, username, nome_exibicao, email, telefone, cargo, bio,
+           (IFNULL(LENGTH(avatar_blob), 0) > 0) AS tem_avatar
+    FROM usuarios WHERE id = %s
+"""
+
+_USER_LOGIN_SELECT = """
+    SELECT id, username, senha_hash, nome_exibicao, email, telefone, cargo, bio,
+           (IFNULL(LENGTH(avatar_blob), 0) > 0) AS tem_avatar
+    FROM usuarios WHERE username = %s
+"""
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def api_auth_login() -> Any:
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"erro": "JSON inválido"}), 400
+    username = str(payload.get("username", "")).strip().lower()
+    password = str(payload.get("password", ""))
+    if not username or not password:
+        return jsonify({"erro": "Informe usuário e senha."}), 400
+
+    conn = connect_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(_USER_LOGIN_SELECT, (username,))
+        row = cur.fetchone()
+        if row is None or not check_password_hash(str(row["senha_hash"]), password):
+            return jsonify({"erro": "Usuário ou senha incorretos."}), 401
+        session.clear()
+        session["user_id"] = int(row["id"])
+        session.permanent = True
+        return jsonify({"ok": True, "user": _user_public_dict(row)})
+    except Error as e:
+        return jsonify({"erro": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def api_auth_logout() -> Any:
+    session.clear()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/auth/me", methods=["GET"])
+def api_auth_me() -> Any:
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"erro": "Não autenticado"}), 401
+    conn = connect_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(_USER_ROW_SELECT, (int(uid),))
+        row = cur.fetchone()
+        if row is None:
+            session.clear()
+            return jsonify({"erro": "Usuário não encontrado"}), 401
+        return jsonify({"user": _user_public_dict(row)})
+    except Error as e:
+        return jsonify({"erro": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/auth/profile", methods=["PUT"])
+def api_auth_profile() -> Any:
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"erro": "Não autenticado"}), 401
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"erro": "JSON inválido"}), 400
+
+    nome_exibicao = str(payload.get("nome_exibicao", "")).strip()
+    email = str(payload.get("email", "")).strip()
+    telefone = str(payload.get("telefone", "")).strip()
+    cargo = str(payload.get("cargo", "")).strip()
+    bio = str(payload.get("bio", "")).strip()
+    if not nome_exibicao:
+        return jsonify({"erro": "nome_exibicao é obrigatório"}), 400
+    if email and "@" not in email:
+        return jsonify({"erro": "E-mail inválido"}), 400
+
+    conn = connect_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            UPDATE usuarios
+            SET nome_exibicao = %s, email = NULLIF(%s,''), telefone = NULLIF(%s,''),
+                cargo = NULLIF(%s,''), bio = NULLIF(%s,'')
+            WHERE id = %s
+            """,
+            (nome_exibicao, email, telefone, cargo, bio, int(uid)),
+        )
+        conn.commit()
+        cur.execute(_USER_ROW_SELECT, (int(uid),))
+        row = cur.fetchone()
+        return jsonify({"ok": True, "user": _user_public_dict(row or {})})
+    except Error as e:
+        conn.rollback()
+        return jsonify({"erro": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/auth/avatar", methods=["GET", "POST", "DELETE"])
+def api_auth_avatar() -> Any:
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"erro": "Não autenticado"}), 401
+
+    conn = connect_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        if request.method == "GET":
+            cur.execute(
+                "SELECT avatar_blob, avatar_mime FROM usuarios WHERE id = %s",
+                (int(uid),),
+            )
+            row = cur.fetchone()
+            if row is None:
+                return jsonify({"erro": "Usuário não encontrado"}), 404
+            blob = row.get("avatar_blob")
+            if not blob or not isinstance(blob, (bytes, bytearray)) or len(blob) == 0:
+                return jsonify({"erro": "Sem foto de perfil"}), 404
+            mime = str(row.get("avatar_mime") or "image/jpeg").strip() or "image/jpeg"
+            resp = Response(bytes(blob), mimetype=mime)
+            resp.headers["Cache-Control"] = "private, max-age=120"
+            return resp
+
+        if request.method == "DELETE":
+            cur.execute(
+                "UPDATE usuarios SET avatar_blob = NULL, avatar_mime = NULL WHERE id = %s",
+                (int(uid),),
+            )
+            conn.commit()
+            return jsonify({"ok": True, "tem_avatar": False})
+
+        up = request.files.get("arquivo")
+        if up is None or up.filename is None or str(up.filename).strip() == "":
+            return jsonify({"erro": "Envie um arquivo no campo \"arquivo\"."}), 400
+        raw = up.read()
+        if len(raw) > AVATAR_MAX_BYTES:
+            return jsonify({"erro": "Imagem muito grande (máximo 2 MB)."}), 400
+        mime = (up.mimetype or "").strip().lower() or "application/octet-stream"
+        if mime not in AVATAR_MIMES:
+            return jsonify({"erro": "Use JPEG, PNG, WebP ou GIF."}), 400
+        cur.execute(
+            "UPDATE usuarios SET avatar_blob = %s, avatar_mime = %s WHERE id = %s",
+            (raw, mime[:127], int(uid)),
+        )
+        conn.commit()
+        return jsonify({"ok": True, "tem_avatar": True})
+    except Error as e:
+        conn.rollback()
+        return jsonify({"erro": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/auth/password", methods=["PUT"])
+def api_auth_password() -> Any:
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"erro": "Não autenticado"}), 401
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"erro": "JSON inválido"}), 400
+    atual = str(payload.get("senha_atual", ""))
+    nova = str(payload.get("senha_nova", ""))
+    conf = str(payload.get("senha_nova_confirma", ""))
+    if len(nova) < 6:
+        return jsonify({"erro": "A nova senha deve ter pelo menos 6 caracteres."}), 400
+    if nova != conf:
+        return jsonify({"erro": "A confirmação da nova senha não confere."}), 400
+
+    conn = connect_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT senha_hash FROM usuarios WHERE id = %s", (int(uid),))
+        row = cur.fetchone()
+        if row is None:
+            return jsonify({"erro": "Usuário não encontrado"}), 404
+        if not check_password_hash(str(row["senha_hash"]), atual):
+            return jsonify({"erro": "Senha atual incorreta."}), 400
+        cur.execute(
+            "UPDATE usuarios SET senha_hash = %s WHERE id = %s",
+            (generate_password_hash(nova), int(uid)),
+        )
+        conn.commit()
+        return jsonify({"ok": True})
+    except Error as e:
+        conn.rollback()
+        return jsonify({"erro": str(e)}), 500
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("FLASK_PORT", "5000")),

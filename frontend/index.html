@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f7f5" id="meta-theme-color" />
-  <meta name="description" content="Diário de P.O. — controle de atividades e gerenciamento de projetos." />
-  <title>Diário de P.O.</title>
+  <meta name="theme-color" content="#E8ECF3" id="meta-theme-color" />
+  <meta name="description" content="DAILY — registro de atividades, projetos e agenda." />
+  <title>DAILY</title>
   <script>
     (function () {
       try {
         if (localStorage.getItem("po_theme") === "dark") {
           document.documentElement.setAttribute("data-theme", "dark");
           var m = document.getElementById("meta-theme-color");
-          if (m) m.setAttribute("content", "#141416");
+          if (m) m.setAttribute("content", "#0c1018");
         }
       } catch (e) {}
     })();
   </script>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2337352f'/%3E%3Cpath fill='%23fff' d='M8 10h10v2H8zm0 5h16v2H8zm0 5h12v2H8z'/%3E%3C/svg%3E" />
+  <link rel="icon" href="/imagens/logo_daily.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -25,91 +25,101 @@
   <style>
     :root {
       color-scheme: light;
-      --bg-page: #f7f7f5;
-      --bg-sidebar: #f1f1ef;
+      --daily-blue: #1e5bb4;
+      --daily-green: #2ecc71;
+      --bg-page: #e9ecf3;
+      --bg-sidebar: #e2e6ef;
       --bg-card: #ffffff;
       --bg-input: #ffffff;
-      --border-subtle: rgba(55, 53, 47, 0.09);
-      --border-strong: rgba(55, 53, 47, 0.16);
-      --text: #37352f;
-      --text-muted: rgba(55, 53, 47, 0.65);
-      --accent: #2383e2;
-      --accent-soft: rgba(35, 131, 226, 0.12);
-      --shadow-card: 0 1px 3px rgba(15, 15, 15, 0.06), 0 4px 12px rgba(15, 15, 15, 0.04);
-      --radius-lg: 14px;
-      --radius-md: 10px;
+      --border-subtle: rgba(26, 32, 44, 0.1);
+      --border-strong: rgba(26, 32, 44, 0.16);
+      --text: #1a1f2e;
+      --text-muted: rgba(26, 31, 46, 0.62);
+      --accent: #1e5bb4;
+      --accent-soft: rgba(30, 91, 180, 0.14);
+      --shadow-card: 0 2px 8px rgba(15, 25, 48, 0.07), 0 8px 24px rgba(15, 25, 48, 0.05);
+      --radius-lg: 16px;
+      --radius-md: 12px;
       --radius-pill: 999px;
       --sidebar-w: 260px;
       --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      --wash: rgba(55, 53, 47, 0.06);
-      --wash-strong: rgba(55, 53, 47, 0.08);
-      --wash-heavy: rgba(55, 53, 47, 0.1);
-      --wash-muted: rgba(55, 53, 47, 0.03);
-      --wash-hover: rgba(55, 53, 47, 0.025);
-      --overlay-backdrop: rgba(15, 15, 15, 0.48);
-      --modal-shadow: 0 16px 48px rgba(15, 15, 15, 0.18);
-      --chart-grid: rgba(55, 53, 47, 0.08);
-      --chart-axis: #787774;
+      --wash: rgba(30, 91, 180, 0.06);
+      --wash-strong: rgba(30, 91, 180, 0.1);
+      --wash-heavy: rgba(30, 91, 180, 0.14);
+      --wash-muted: rgba(30, 91, 180, 0.04);
+      --wash-hover: rgba(30, 91, 180, 0.07);
+      --overlay-backdrop: rgba(12, 16, 24, 0.52);
+      --modal-shadow: 0 20px 50px rgba(12, 20, 40, 0.2);
+      --chart-grid: rgba(30, 91, 180, 0.1);
+      --chart-axis: #5c6578;
       --chart-doughnut-border: #ffffff;
-      --diario-weekday: #1d4ed8;
-      --diario-date-strong: #0f172a;
-      --hero-g1: rgba(35, 131, 226, 0.14);
-      --hero-g2: rgba(144, 101, 176, 0.1);
-      --hero-border: rgba(35, 131, 226, 0.28);
-      --hero-shadow: 0 2px 12px rgba(35, 131, 226, 0.08);
+      --diario-weekday: #1e5bb4;
+      --diario-date-strong: #0f1729;
+      --hero-g1: rgba(30, 91, 180, 0.12);
+      --hero-g2: rgba(46, 204, 113, 0.12);
+      --hero-border: rgba(30, 91, 180, 0.28);
+      --hero-shadow: 0 4px 20px rgba(30, 91, 180, 0.12);
       --agenda-card-top: #ffffff;
-      --agenda-card-bot: #fafafa;
-      --agenda-card-shadow: 0 1px 2px rgba(15, 15, 15, 0.04);
-      --sidebar-mobile-shadow: 8px 0 24px rgba(15, 15, 15, 0.08);
-      --backdrop-mobile: rgba(15, 15, 15, 0.35);
-      --brand-mark-bg: #37352f;
+      --agenda-card-bot: #f6f7fb;
+      --agenda-card-shadow: 0 2px 8px rgba(15, 25, 48, 0.06);
+      --sidebar-mobile-shadow: 8px 0 28px rgba(15, 25, 48, 0.12);
+      --backdrop-mobile: rgba(12, 16, 24, 0.4);
+      --brand-mark-bg: #0f1729;
       --brand-mark-fg: #ffffff;
-      --toast-bg: #37352f;
-      --toast-fg: #ffffff;
-      --meta-theme: #f7f7f5;
-      --folder-hover-border: rgba(35, 131, 226, 0.38);
+      --toast-bg: #1a2235;
+      --toast-fg: #f4f6fb;
+      --meta-theme: #e8ecf3;
+      --folder-hover-border: rgba(46, 204, 113, 0.45);
+      --secondary: #2ecc71;
+      --secondary-soft: rgba(46, 204, 113, 0.18);
+      --secondary-muted: rgba(30, 91, 180, 0.55);
+      --link-tint: #174a96;
     }
 
     html[data-theme="dark"] {
       color-scheme: dark;
-      --bg-page: #141416;
-      --bg-sidebar: #1a1a1e;
-      --bg-card: #222226;
-      --bg-input: #2c2c32;
+      --bg-page: #0c1018;
+      --bg-sidebar: #121826;
+      --bg-card: #1a2233;
+      --bg-input: #222b3e;
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-strong: rgba(255, 255, 255, 0.14);
-      --text: #ececec;
-      --text-muted: rgba(236, 236, 236, 0.58);
-      --accent: #5eb3ff;
-      --accent-soft: rgba(94, 179, 255, 0.2);
-      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
-      --wash: rgba(255, 255, 255, 0.06);
-      --wash-strong: rgba(255, 255, 255, 0.1);
-      --wash-heavy: rgba(255, 255, 255, 0.14);
+      --text: #eef2fb;
+      --text-muted: rgba(228, 234, 248, 0.58);
+      --accent: #5ea8ff;
+      --accent-soft: rgba(94, 168, 255, 0.18);
+      --shadow-card: 0 4px 28px rgba(0, 0, 0, 0.45);
+      --wash: rgba(94, 168, 255, 0.08);
+      --wash-strong: rgba(94, 168, 255, 0.12);
+      --wash-heavy: rgba(94, 168, 255, 0.16);
       --wash-muted: rgba(255, 255, 255, 0.04);
-      --wash-hover: rgba(255, 255, 255, 0.05);
-      --overlay-backdrop: rgba(0, 0, 0, 0.65);
+      --wash-hover: rgba(255, 255, 255, 0.06);
+      --overlay-backdrop: rgba(0, 0, 0, 0.68);
       --modal-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
       --chart-grid: rgba(255, 255, 255, 0.08);
-      --chart-axis: #9ca3af;
-      --chart-doughnut-border: #222226;
-      --diario-weekday: #93c5fd;
-      --diario-date-strong: #f1f5f9;
-      --hero-g1: rgba(94, 179, 255, 0.14);
-      --hero-g2: rgba(167, 139, 250, 0.12);
-      --hero-border: rgba(94, 179, 255, 0.28);
-      --hero-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-      --agenda-card-top: #28282e;
-      --agenda-card-bot: #222226;
-      --agenda-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-      --sidebar-mobile-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
+      --chart-axis: #9db0d0;
+      --chart-doughnut-border: #1a2233;
+      --diario-weekday: #5eea9a;
+      --diario-date-strong: #f1f5ff;
+      --hero-g1: rgba(94, 168, 255, 0.14);
+      --hero-g2: rgba(46, 204, 113, 0.12);
+      --hero-border: rgba(94, 234, 170, 0.35);
+      --hero-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      --agenda-card-top: #1e2738;
+      --agenda-card-bot: #1a2233;
+      --agenda-card-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+      --sidebar-mobile-shadow: 8px 0 32px rgba(0, 0, 0, 0.55);
       --backdrop-mobile: rgba(0, 0, 0, 0.55);
-      --brand-mark-bg: #e8eaed;
-      --brand-mark-fg: #141416;
-      --toast-bg: #2c2c32;
-      --toast-fg: #f1f5f9;
-      --meta-theme: #141416;
-      --folder-hover-border: rgba(94, 179, 255, 0.45);
+      --brand-mark-bg: #e8ecf3;
+      --brand-mark-fg: #0c1018;
+      --toast-bg: #222b3e;
+      --toast-fg: #f1f5ff;
+      --meta-theme: #0c1018;
+      --folder-hover-border: rgba(94, 234, 170, 0.5);
+      --secondary: #3dd68d;
+      --secondary-soft: rgba(61, 214, 141, 0.2);
+      --secondary-muted: rgba(167, 243, 208, 0.75);
+      --link-tint: #7ec8ff;
     }
 
     * { box-sizing: border-box; }
@@ -135,7 +145,7 @@
       margin: 0;
     }
 
-    /* —— Sidebar (Notion) —— */
+    /* —— Sidebar —— */
     .sidebar {
       width: var(--sidebar-w);
       flex-shrink: 0;
@@ -152,6 +162,70 @@
       overflow-y: auto;
     }
 
+    .sidebar-logout-wrap {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.65rem;
+    }
+    .sidebar-app-logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.15rem 0 0.1rem;
+    }
+    .sidebar-app-logo img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 168px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 14px rgba(15, 25, 48, 0.12));
+    }
+    html[data-theme="dark"] .sidebar-app-logo img {
+      filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.45));
+    }
+    .btn-sidebar-logout {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.26rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(220, 38, 38, 0.45);
+      background: transparent;
+      color: #b91c1c;
+      letter-spacing: 0.02em;
+    }
+    .btn-sidebar-logout:hover {
+      background: rgba(220, 38, 38, 0.08);
+      color: #991b1b;
+    }
+    html[data-theme="dark"] .btn-sidebar-logout {
+      color: #f87171;
+      border-color: rgba(248, 113, 113, 0.45);
+    }
+    html[data-theme="dark"] .btn-sidebar-logout:hover {
+      background: rgba(248, 113, 113, 0.12);
+      color: #fecaca;
+    }
+    html[data-sidebar-collapsed="true"] .sidebar-app-logo {
+      display: none;
+    }
+    html[data-sidebar-collapsed="true"] .sidebar-logout-wrap {
+      display: flex;
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    html[data-sidebar-collapsed="true"] .btn-sidebar-logout {
+      font-size: 0.62rem;
+      padding: 0.22rem 0.45rem;
+    }
+
     .brand {
       display: flex;
       align-items: center;
@@ -164,6 +238,203 @@
       flex: 1;
       min-width: 0;
     }
+    .brand-text strong {
+      display: block;
+      font-size: 0.95rem;
+      line-height: 1.2;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.12rem;
+    }
+    .brand-avatar-btn {
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 16px;
+      flex-shrink: 0;
+      line-height: 0;
+    }
+    .brand-avatar-btn:hover .user-avatar-stack {
+      filter: brightness(0.97);
+    }
+    .brand-avatar-btn:focus-visible {
+      outline: 2px solid var(--secondary);
+      outline-offset: 2px;
+    }
+    html[data-theme="dark"] .brand-avatar-btn:focus-visible {
+      outline-color: var(--accent);
+    }
+    .user-avatar-stack {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 1px 4px rgba(15, 15, 15, 0.08);
+    }
+    .user-avatar-img {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      pointer-events: none;
+    }
+    .user-avatar-img.is-visible {
+      display: block;
+    }
+    .user-avatar {
+      position: relative;
+      z-index: 1;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, var(--secondary-soft), var(--accent-soft));
+      color: var(--secondary);
+      border: none;
+    }
+    .user-avatar.is-hidden {
+      display: none;
+    }
+    html[data-theme="dark"] .user-avatar {
+      color: var(--accent);
+    }
+    .perfil-avatar-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.1rem;
+    }
+    .perfil-avatar-preview-wrap {
+      width: 88px;
+      height: 88px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: var(--wash-muted);
+      flex-shrink: 0;
+    }
+    .perfil-avatar-preview-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .perfil-avatar-preview-wrap img:not([src]),
+    .perfil-avatar-preview-wrap img[src=""] {
+      display: none;
+    }
+    .perfil-senha-toggle-wrap {
+      margin: 0.25rem 0 0.75rem;
+    }
+
+    .brand-tools-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .btn-icon-nav {
+      border: none;
+      background: transparent;
+      padding: 0.35rem;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: grid;
+      place-items: center;
+      line-height: 0;
+    }
+    .btn-icon-nav:hover {
+      background: var(--wash-strong);
+      color: var(--text);
+    }
+
+    html[data-sidebar-collapsed="true"] {
+      --sidebar-w: 72px;
+    }
+    html[data-sidebar-collapsed="true"] .brand-text,
+    html[data-sidebar-collapsed="true"] .nav-label,
+    html[data-sidebar-collapsed="true"] .nav-btn-label {
+      display: none !important;
+    }
+    html[data-sidebar-collapsed="true"] .brand {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+    }
+    html[data-sidebar-collapsed="true"] .brand-tools-stack {
+      margin-left: 0;
+    }
+    html[data-sidebar-collapsed="true"] .user-avatar-stack,
+    html[data-sidebar-collapsed="true"] .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+    }
+    html[data-sidebar-collapsed="true"] .user-avatar {
+      font-size: 0.78rem;
+    }
+    html[data-sidebar-collapsed="true"] .nav-btn {
+      justify-content: center;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    html[data-sidebar-collapsed="true"] .nav-btn.active {
+      border-left: none;
+      padding-left: 0.5rem;
+      box-shadow: inset 0 0 0 2px var(--secondary-soft);
+    }
+    html[data-theme="dark"][data-sidebar-collapsed="true"] .nav-btn.active {
+      box-shadow: inset 0 0 0 2px var(--accent-soft);
+    }
+
+    @media (max-width: 860px) {
+      #btn-sidebar-collapse {
+        display: none;
+      }
+      html[data-sidebar-collapsed="true"] {
+        --sidebar-w: 260px;
+      }
+      html[data-sidebar-collapsed="true"] .brand-text,
+      html[data-sidebar-collapsed="true"] .nav-label,
+      html[data-sidebar-collapsed="true"] .nav-btn-label {
+        display: block !important;
+      }
+      html[data-sidebar-collapsed="true"] .brand {
+        flex-direction: row;
+        text-align: left;
+      }
+      html[data-sidebar-collapsed="true"] .brand-tools-stack {
+        margin-left: auto;
+      }
+      html[data-sidebar-collapsed="true"] .nav-btn {
+        justify-content: flex-start;
+      }
+      html[data-sidebar-collapsed="true"] .nav-btn.active {
+        border-left: 3px solid var(--secondary);
+        padding-left: calc(0.65rem - 3px);
+        box-shadow: none;
+      }
+    }
+
     .notify-wrap {
       position: relative;
       flex-shrink: 0;
@@ -282,13 +553,13 @@
       background: var(--bg-card);
       font-size: 1.35rem;
       font-weight: 600;
-      color: var(--accent);
+      color: var(--secondary);
       cursor: pointer;
       line-height: 1;
       transition: background 0.12s ease, opacity 0.12s ease;
     }
     .diario-date-nav:hover:not(:disabled) {
-      background: var(--accent-soft);
+      background: var(--secondary-soft);
     }
     .diario-date-nav:disabled {
       opacity: 0.35;
@@ -556,7 +827,7 @@
     }
     .anexo-row:last-child { border-bottom: none; }
     .anexo-row a {
-      color: var(--accent);
+      color: var(--link-tint);
       font-weight: 600;
       text-decoration: none;
       word-break: break-all;
@@ -573,6 +844,7 @@
       overflow: hidden;
       background: var(--bg-card);
       box-shadow: var(--agenda-card-shadow);
+      border-left: 3px solid var(--secondary-soft);
     }
     .diario-section-head {
       list-style: none;
@@ -582,7 +854,7 @@
       font-size: 0.74rem;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      background: var(--wash-strong);
+      background: linear-gradient(90deg, var(--secondary-soft) 0%, var(--wash-strong) 38%, var(--wash-strong) 100%);
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -609,9 +881,40 @@
       display: flex;
       flex-direction: column;
     }
+    .diario-section-footer {
+      display: flex;
+      justify-content: center;
+      padding: 0.55rem 0.75rem 0.75rem;
+      border-top: 1px dashed var(--border-strong);
+      background: linear-gradient(180deg, var(--wash-muted) 0%, transparent 100%);
+    }
+    .btn-diario-section-plus {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      padding: 0 0.85rem;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: var(--secondary);
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 2px 8px var(--secondary-soft);
+      transition: filter 0.12s ease, transform 0.08s ease;
+    }
+    .btn-diario-section-plus:hover {
+      filter: brightness(1.08);
+    }
+    .btn-diario-section-plus:active {
+      transform: scale(0.96);
+    }
     .diario-row {
       display: grid;
-      grid-template-columns: 58px minmax(0, 1fr) auto;
+      grid-template-columns: 88px minmax(0, 1fr) auto;
       gap: 0.65rem 0.65rem;
       padding: 0.65rem 0.9rem;
       border-bottom: 1px solid var(--border-subtle);
@@ -624,12 +927,28 @@
       font-weight: 700;
       font-size: 0.8rem;
       color: var(--accent);
-      line-height: 1.35;
-      padding-top: 0.2rem;
+      line-height: 1.25;
+      padding-top: 0.15rem;
       text-align: right;
       border-right: 2px solid var(--accent-soft);
       padding-right: 0.65rem;
       margin-right: 0.15rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.1rem;
+    }
+    .diario-time-start { font-size: 0.82rem; }
+    .diario-time-sep {
+      font-size: 0.62rem;
+      font-weight: 600;
+      opacity: 0.55;
+      letter-spacing: 0.02em;
+    }
+    .diario-time-end {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--secondary);
     }
     .diario-hour-gap {
       width: 100%;
@@ -759,6 +1078,8 @@
     .nav-btn.active {
       background: var(--wash-strong);
       font-weight: 600;
+      border-left: 3px solid var(--secondary);
+      padding-left: calc(0.65rem - 3px);
     }
     .nav-btn svg {
       width: 18px;
@@ -805,7 +1126,7 @@
     .breadcrumb {
       font-size: 0.72rem;
       font-weight: 500;
-      color: var(--text-muted);
+      color: var(--secondary-muted);
       letter-spacing: 0.02em;
       margin-bottom: 0.35rem;
     }
@@ -1124,22 +1445,32 @@
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-mark">PO</div>
+        <button type="button" class="brand-avatar-btn" id="header-profile-open" title="Perfil e configurações" aria-label="Abrir perfil e configurações">
+          <span class="user-avatar-stack">
+            <span class="user-avatar" id="header-user-avatar">—</span>
+            <img id="header-user-avatar-img" class="user-avatar-img" alt="" decoding="async" />
+          </span>
+        </button>
         <div class="brand-text">
-          <strong>Diário de P.O.</strong>
-          <span>Controle de Atividades - Gerenciamento de Projetos</span>
+          <strong id="header-user-name">…</strong>
+          <span>DAILY</span>
         </div>
-        <div class="notify-wrap">
-          <button type="button" class="btn-bell" id="btn-bell" aria-label="Notificações" aria-expanded="false">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-            <span class="bell-badge" id="bell-badge" hidden aria-hidden="true"></span>
+        <div class="brand-tools-stack">
+          <button type="button" class="btn-icon-nav" id="btn-sidebar-collapse" aria-label="Recolher menu lateral" title="Mostrar só ícones no menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
-          <div class="notify-panel" id="notify-panel" hidden role="region" aria-label="Painel de notificações">
-            <div class="notify-panel-head">Notificações</div>
-            <div class="notify-panel-body" id="notify-panel-body">
-              <p class="empty-hint" style="margin:0">Nenhuma notificação no momento.</p>
+          <div class="notify-wrap">
+            <button type="button" class="btn-bell" id="btn-bell" aria-label="Notificações" aria-expanded="false">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+              <span class="bell-badge" id="bell-badge" hidden aria-hidden="true"></span>
+            </button>
+            <div class="notify-panel" id="notify-panel" hidden role="region" aria-label="Painel de notificações">
+              <div class="notify-panel-head">Notificações</div>
+              <div class="notify-panel-body" id="notify-panel-body">
+                <p class="empty-hint" style="margin:0">Nenhuma notificação no momento.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1147,33 +1478,42 @@
       <div class="nav-label">Navegação</div>
       <button type="button" class="nav-btn active" data-section="home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
-        Home
+        <span class="nav-btn-label">Home</span>
       </button>
       <button type="button" class="nav-btn" data-section="diario">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
-        Diário
+        <span class="nav-btn-label">Diário</span>
       </button>
       <button type="button" class="nav-btn" data-section="projetos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-        Projetos
+        <span class="nav-btn-label">Projetos</span>
       </button>
       <button type="button" class="nav-btn" data-section="dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17v-6"/><path d="M12 17V9"/><path d="M16 17v-3"/></svg>
-        Dashboard
+        <span class="nav-btn-label">Dashboard</span>
       </button>
       <button type="button" class="nav-btn" data-section="relatorio">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><path d="M9 5a2 2 0 012-2h2a2 2 0 012 2v0a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
-        Relatório
+        <span class="nav-btn-label">Relatório</span>
       </button>
       <button type="button" class="nav-btn" data-section="agenda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
-        Agenda
+        <span class="nav-btn-label">Agenda</span>
       </button>
       <div class="nav-label" style="margin-top:0.25rem">Sistema</div>
       <button type="button" class="nav-btn" data-section="ajustes">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        Ajustes
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/>
+          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span class="nav-btn-label">Ajustes</span>
       </button>
+      <div class="sidebar-logout-wrap">
+        <div class="sidebar-app-logo">
+          <img src="/imagens/logo_daily.png" alt="DAILY" width="220" height="220" decoding="async" />
+        </div>
+        <button type="button" class="btn-sidebar-logout" id="sidebar-btn-logout" title="Encerrar sessão e voltar ao login">Sair</button>
+      </div>
     </aside>
 
     <main class="main">
@@ -1181,7 +1521,7 @@
       <section class="section active" id="section-home">
         <header class="page-head">
           <p class="breadcrumb">Início</p>
-          <h1 class="page-title">Bem-vindo ao Diário de P.O.</h1>
+          <h1 class="page-title">Bem-vindo ao DAILY</h1>
           <p class="page-desc">
             Seu espaço para registrar o dia a dia como Product Owner ou gerente de projetos: tempo por projeto,
             agenda com lembretes e visão consolidada no dashboard — tudo em um só lugar, acessível pelo navegador.
@@ -1226,8 +1566,8 @@
           <p class="breadcrumb">Diário</p>
           <h1 class="page-title">Controle de atividades</h1>
           <p class="page-desc" id="diario-subtitle">
-            Escolha o dia trabalhado (hoje ou dias anteriores). As atividades aparecem em blocos por <strong>empresa</strong>,
-            com o horário à esquerda. Use o botão <strong>+</strong> na lista para registrar uma nova ocorrência.
+            Escolha o dia trabalhado (hoje ou anteriores). Cada ocorrência tem <strong>início e fim</strong>; a lista mostra o intervalo à esquerda.
+            Não é permitido sobrepor horários no mesmo dia. Use <strong>+</strong> na lista para incluir uma ocorrência.
           </p>
         </header>
 
@@ -1257,7 +1597,7 @@
             <div>
               <h2 class="card-title">Lista do dia</h2>
               <p style="margin:0.35rem 0 0;font-size:0.8rem;color:var(--text-muted);max-width:52ch">
-                Cada bloco é uma empresa. As linhas seguem o relógio; traços tracejados marcam mudança de hora.
+                Cada bloco é uma empresa. À esquerda: <strong>início até término</strong> do intervalo; embaixo, a duração em minutos.
               </p>
             </div>
             <div class="toolbar" style="gap:0.5rem">
@@ -1400,6 +1740,13 @@
         </header>
 
         <div class="card">
+          <h2 class="card-title" style="margin-bottom:0.5rem">Conta</h2>
+          <p class="settings-hint">
+            Para <strong>nome de exibição</strong>, <strong>e-mail</strong>, <strong>telefone</strong>, <strong>senha</strong> e demais dados pessoais, clique na <strong>foto</strong> ao lado do seu nome na barra lateral.
+          </p>
+        </div>
+
+        <div class="card">
           <h2 class="card-title" style="margin-bottom:0.5rem">Aparência</h2>
           <p class="settings-hint">
             <strong>Modo claro</strong> é o padrão. No <strong>modo escuro</strong>, fundos e cartões ficam mais escuros e o texto passa para tons claros e cinza, reduzindo o cansaço visual em ambientes com pouca luz.
@@ -1414,7 +1761,7 @@
         <div class="card">
           <h2 class="card-title" style="margin-bottom:0.5rem">Dados e privacidade</h2>
           <p class="settings-hint">
-            O Diário de P.O. grava suas atividades e projetos no <strong>MariaDB</strong> configurado no servidor. Algumas preferências locais (tema, notificações já vistas, projeto pré-selecionado) ficam só no <strong>armazenamento do navegador</strong>.
+            O aplicativo grava suas atividades e projetos no <strong>MariaDB</strong> configurado no servidor. Algumas preferências locais (tema, notificações já vistas, projeto pré-selecionado) ficam só no <strong>armazenamento do navegador</strong>.
           </p>
           <ul class="settings-list">
             <li>Lembretes da agenda usam a API de notificações do sistema quando você autoriza.</li>
@@ -1426,7 +1773,7 @@
           <h2 class="card-title" style="margin-bottom:0.5rem">Sobre</h2>
           <dl class="settings-kv">
             <dt>Aplicativo</dt>
-            <dd>Diário de P.O. · PM Controller</dd>
+            <dd>DAILY — produtividade corporativa simplificada</dd>
             <dt>Interface</dt>
             <dd>HTML único + API Flask</dd>
           </dl>
@@ -1453,12 +1800,12 @@
               <select id="modal-diario-projeto" class="select" required></select>
             </div>
             <div>
-              <label class="field-label" for="modal-diario-hora">Horário</label>
+              <label class="field-label" for="modal-diario-hora">Início</label>
               <input id="modal-diario-hora" class="input" type="time" required />
             </div>
             <div>
-              <label class="field-label" for="modal-diario-duracao">Duração (min)</label>
-              <input id="modal-diario-duracao" class="input" type="number" min="0" step="1" placeholder="30" required />
+              <label class="field-label" for="modal-diario-hora-fim">Término</label>
+              <input id="modal-diario-hora-fim" class="input" type="time" required />
             </div>
             <div>
               <label class="field-label" for="modal-diario-categoria">Categoria</label>
@@ -1526,6 +1873,93 @@
     </div>
   </div>
 
+  <!-- Modal: perfil do usuário -->
+  <div id="modal-perfil-overlay" class="modal-overlay" hidden>
+    <div class="modal-sheet modal-sheet-lg" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-title">
+      <div class="modal-head">
+        <h3 class="modal-title" id="modal-perfil-title">Perfil e configurações</h3>
+        <button type="button" class="modal-close" id="modal-perfil-close" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0 0 1rem;font-size:0.82rem;color:var(--text-muted)">
+          Usuário de login: <strong id="perfil-user-login">—</strong>
+        </p>
+        <div class="perfil-avatar-row">
+          <div class="perfil-avatar-preview-wrap">
+            <img id="perfil-avatar-preview" alt="" />
+          </div>
+          <div style="flex:1;min-width:180px">
+            <label class="field-label">Foto do perfil</label>
+            <input type="file" id="perfil-avatar-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+            <div class="toolbar" style="flex-wrap:wrap;gap:0.5rem;margin-top:0.25rem">
+              <button type="button" class="btn btn-primary" id="perfil-avatar-pick">Escolher foto…</button>
+              <button type="button" class="btn btn-ghost" id="perfil-avatar-remove">Remover foto</button>
+            </div>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin:0.5rem 0 0;line-height:1.4;max-width:36ch">
+              A imagem fica salva no <strong>MariaDB</strong> (até 2 MB; JPEG, PNG, WebP ou GIF) e é usada no ícone ao lado do seu nome.
+            </p>
+          </div>
+        </div>
+        <form id="form-perfil-dados">
+          <div class="row" style="margin-bottom:0.75rem">
+            <div style="grid-column: span 2">
+              <label class="field-label" for="perfil-nome">Nome de exibição</label>
+              <input id="perfil-nome" class="input" type="text" required autocomplete="name" />
+            </div>
+            <div>
+              <label class="field-label" for="perfil-email">E-mail</label>
+              <input id="perfil-email" class="input" type="email" autocomplete="email" placeholder="opcional" />
+            </div>
+            <div>
+              <label class="field-label" for="perfil-telefone">Telefone</label>
+              <input id="perfil-telefone" class="input" type="tel" autocomplete="tel" placeholder="opcional" />
+            </div>
+            <div style="grid-column: span 2">
+              <label class="field-label" for="perfil-cargo">Cargo ou organização</label>
+              <input id="perfil-cargo" class="input" type="text" placeholder="opcional" />
+            </div>
+            <div style="grid-column: span 2">
+              <label class="field-label" for="perfil-bio">Bio / observações</label>
+              <textarea id="perfil-bio" class="input" rows="3" placeholder="Texto livre para suas anotações"></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Salvar dados do perfil</button>
+        </form>
+        <div style="margin:1.25rem 0;border-top:1px solid var(--border-subtle)"></div>
+        <div class="perfil-senha-toggle-wrap">
+          <button type="button" class="btn btn-ghost" id="btn-toggle-perfil-senha" aria-expanded="false" aria-controls="perfil-senha-panel" style="width:100%;justify-content:center">
+            Alterar senha…
+          </button>
+        </div>
+        <div id="perfil-senha-panel" hidden>
+          <p style="margin:0 0 0.75rem;font-size:0.8rem;color:var(--text-muted);line-height:1.4">
+            Os campos abaixo ficam ocultos até você abrir esta seção, para evitar exposição acidental da senha.
+          </p>
+          <form id="form-perfil-senha">
+            <div class="row" style="margin-bottom:0.75rem">
+              <div style="grid-column: span 2">
+                <label class="field-label" for="perfil-senha-atual">Senha atual</label>
+                <input id="perfil-senha-atual" class="input" type="password" autocomplete="current-password" />
+              </div>
+              <div>
+                <label class="field-label" for="perfil-senha-nova">Nova senha</label>
+                <input id="perfil-senha-nova" class="input" type="password" autocomplete="new-password" minlength="6" />
+              </div>
+              <div>
+                <label class="field-label" for="perfil-senha-nova2">Confirmar nova senha</label>
+                <input id="perfil-senha-nova2" class="input" type="password" autocomplete="new-password" minlength="6" />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-ghost" style="margin-right:0.5rem">Atualizar senha</button>
+          </form>
+        </div>
+        <div style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:flex-end">
+          <button type="button" class="btn btn-ghost" id="btn-perfil-logout">Sair da conta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
 (function () {
   const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -1558,11 +1992,22 @@
     return "http://localhost:5000";
   }
 
-  async function apiGet(path) {
-    const r = await fetch(apiBase() + path, { headers: { Accept: "application/json" } });
+  async function handleApiResponse(r) {
     const data = await r.json().catch(() => ({}));
+    if (r.status === 401 && data.auth) {
+      window.location.href = "/login.html";
+      throw new Error("Sessão expirada");
+    }
     if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
     return data;
+  }
+
+  async function apiGet(path) {
+    const r = await fetch(apiBase() + path, {
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+    return handleApiResponse(r);
   }
 
   async function apiPost(path, body) {
@@ -1570,10 +2015,9 @@
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(body),
+      credentials: "include",
     });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
-    return data;
+    return handleApiResponse(r);
   }
 
   async function apiPut(path, body) {
@@ -1581,28 +2025,35 @@
       method: "PUT",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(body),
+      credentials: "include",
     });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
-    return data;
+    return handleApiResponse(r);
   }
 
   async function apiDelete(path) {
-    const r = await fetch(apiBase() + path, { method: "DELETE", headers: { Accept: "application/json" } });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
-    return data;
+    const r = await fetch(apiBase() + path, {
+      method: "DELETE",
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+    return handleApiResponse(r);
   }
 
   async function apiPostForm(path, formData) {
-    const r = await fetch(apiBase() + path, { method: "POST", body: formData });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.erro || data.message || "Erro na API");
-    return data;
+    const r = await fetch(apiBase() + path, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+    return handleApiResponse(r);
   }
 
   const LS_PREFILL_PROJETO = "po_prefill_projeto_id";
   const LS_THEME = "po_theme";
+  const LS_SIDEBAR_COLLAPSED = "po_sidebar_collapsed";
+
+  let lastDiarioLogsForModal = /** @type {any[]} */ ([]);
+  let diarioModalClienteFilter = /** @type {string | null} */ (null);
 
   function getChartTheme() {
     const cs = getComputedStyle(document.documentElement);
@@ -1633,7 +2084,7 @@
       localStorage.setItem(LS_THEME, dark ? "dark" : "light");
     } catch (_) {}
     const meta = $("#meta-theme-color");
-    if (meta) meta.setAttribute("content", dark ? "#141416" : "#f7f7f5");
+    if (meta) meta.setAttribute("content", dark ? "#0c1018" : "#E8ECF3");
     syncThemeControls();
     if (chartProj || chartWeek) loadDashboard();
   }
@@ -1868,8 +2319,90 @@
 
   function setDiarioTimeNow() {
     const now = new Date();
-    $("#modal-diario-hora").value =
+    const hm =
       String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    $("#modal-diario-hora").value = hm;
+    $("#modal-diario-hora-fim").value = defaultEndFromStart(hm);
+  }
+
+  function defaultEndFromStart(timeVal) {
+    if (!timeVal || !/^\d{2}:\d{2}$/.test(timeVal)) return "10:00";
+    const [h, m] = timeVal.split(":").map((x) => parseInt(x, 10));
+    let mins = h * 60 + m + 60;
+    if (mins >= 24 * 60) mins = 24 * 60 - 1;
+    const hh = Math.floor(mins / 60);
+    const mmv = mins % 60;
+    return String(hh).padStart(2, "0") + ":" + String(mmv).padStart(2, "0");
+  }
+
+  function diarioEndHM(l) {
+    if (l.data_hora_fim) {
+      const u = String(l.data_hora_fim).trim().replace("T", " ");
+      return u.length >= 16 ? u.slice(11, 16) : "";
+    }
+    const start = String(l.data_hora || "").trim().replace("T", " ");
+    if (start.length < 16) return "";
+    const datePart = start.slice(0, 10);
+    const tm = start.slice(11, 16);
+    const [hh, mm] = tm.split(":").map((x) => parseInt(x, 10));
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return "";
+    const t0 = new Date(`${datePart}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00`);
+    t0.setMinutes(t0.getMinutes() + (Number(l.duracao_minutos) || 0));
+    return String(t0.getHours()).padStart(2, "0") + ":" + String(t0.getMinutes()).padStart(2, "0");
+  }
+
+  function parseLocalDayTime(isoLike) {
+    const s = String(isoLike || "").trim().replace("T", " ");
+    if (s.length < 16) return null;
+    const d = new Date(s.slice(0, 10) + "T" + s.slice(11, 16) + ":00");
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function logEndAsDateFromLog(l) {
+    const f = parseLocalDayTime(l.data_hora_fim);
+    if (f) return f;
+    const s = parseLocalDayTime(l.data_hora);
+    if (!s) return null;
+    const out = new Date(s.getTime());
+    out.setMinutes(out.getMinutes() + (Number(l.duracao_minutos) || 0));
+    return out;
+  }
+
+  function lastEndForProjetoJs(pid, excludeLogId) {
+    let best = null;
+    const pids = String(pid);
+    for (const l of lastDiarioLogsForModal) {
+      if (excludeLogId != null && String(l.id) === String(excludeLogId)) continue;
+      if (String(l.projeto_id) !== pids) continue;
+      const e = logEndAsDateFromLog(l);
+      if (!e || Number.isNaN(e.getTime())) continue;
+      if (!best || e > best) best = e;
+    }
+    return best;
+  }
+
+  function hmFromDate(d) {
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+
+  function applyDiarioModalTimesForSelectedProjeto() {
+    if ($("#modal-diario-log-id").value.trim()) return;
+    const pid = $("#modal-diario-projeto").value;
+    if (!pid) return;
+    const day = $("#diario-data").value || todayIso();
+    const le = lastEndForProjetoJs(pid, null);
+    let startStr;
+    if (le && !Number.isNaN(le.getTime())) {
+      startStr = hmFromDate(le);
+    } else if (day === todayIso()) {
+      const now = new Date();
+      startStr =
+        String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    } else {
+      startStr = "09:00";
+    }
+    $("#modal-diario-hora").value = startStr;
+    $("#modal-diario-hora-fim").value = defaultEndFromStart(startStr);
   }
 
   function isoDate(d) {
@@ -1937,12 +2470,13 @@
     syncDiarioDateHero();
     const pretty = d.split("-").reverse().join("/");
     $("#diario-subtitle").textContent =
-      `Dia trabalhado: ${pretty}. Blocos por empresa; horário à esquerda. Use + na lista para incluir ocorrências.`;
+      `Dia trabalhado: ${pretty}. Início e fim de cada bloco à esquerda; intervalos não podem se sobrepor no mesmo dia.`;
     const mount = $("#diario-board");
     mount.innerHTML = `<p class="empty-hint">Carregando…</p>`;
     try {
       const data = await apiGet("/api/logs/dia/" + encodeURIComponent(d));
       const logs = data.logs || [];
+      lastDiarioLogsForModal = Array.isArray(logs) ? logs.slice() : [];
       if (!logs.length) {
         mount.innerHTML = `<p class="empty-hint">Nenhuma atividade registrada neste dia.</p>`;
         return;
@@ -1965,12 +2499,13 @@
           let lastHour = /** @type {string | null} */ (null);
           const rows = [];
           for (const l of items) {
-            const t = (l.data_hora || "").slice(11, 16);
-            const hour = t.length >= 2 ? t.slice(0, 2) : "";
+            const tStart = (l.data_hora || "").slice(11, 16);
+            const hour = tStart.length >= 2 ? tStart.slice(0, 2) : "";
             if (lastHour !== null && hour !== lastHour) {
               rows.push('<div class="diario-hour-gap" aria-hidden="true"></div>');
             }
             lastHour = hour;
+            const tEnd = diarioEndHM(l) || "—";
             const cat = categoriaLabelPt(l.categoria);
             const pc = pillCatClass(l.categoria);
             const proj = escapeHtml(l.projeto_nome || "");
@@ -1978,7 +2513,11 @@
             const mins = l.duracao_minutos;
             const lid = l.id != null ? String(l.id) : "";
             rows.push(`<div class="diario-row">
-              <div class="diario-row-time">${escapeHtml(t)}</div>
+              <div class="diario-row-time">
+                <span class="diario-time-start">${escapeHtml(tStart)}</span>
+                <span class="diario-time-sep">até</span>
+                <span class="diario-time-end">${escapeHtml(tEnd)}</span>
+              </div>
               <div class="diario-row-main">
                 <div class="diario-row-top">
                   <span class="pill-cat ${pc}">${escapeHtml(cat)}</span>
@@ -2000,10 +2539,14 @@
               <span class="diario-section-count">${items.length}</span>
             </summary>
             <div class="diario-rows-wrap">${rows.join("")}</div>
+            <div class="diario-section-footer">
+              <button type="button" class="btn-diario-section-plus" data-diario-empresa="${encodeURIComponent(emp)}" title="Nova ocorrência nesta empresa" aria-label="Nova ocorrência nesta empresa">+</button>
+            </div>
           </details>`;
         })
         .join("");
     } catch (e) {
+      lastDiarioLogsForModal = [];
       mount.innerHTML = `<p class="empty-hint">Não foi possível carregar o diário.</p>`;
       toast(e.message, true);
     }
@@ -2017,7 +2560,7 @@
       .replace(/"/g, "&quot;");
   }
 
-  async function fillProjetoOptgroups(selectEl, preferredId) {
+  async function fillProjetoOptgroups(selectEl, preferredId, clienteNomeFilter) {
     try {
       const data = await apiGet("/api/projetos");
       const projetos = data.projetos || [];
@@ -2031,7 +2574,15 @@
         if (!byClient[cn]) byClient[cn] = [];
         byClient[cn].push(p);
       }
-      const keys = Object.keys(byClient).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      let keys = Object.keys(byClient).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      if (clienteNomeFilter != null && String(clienteNomeFilter).trim() !== "") {
+        const f = String(clienteNomeFilter).trim();
+        keys = keys.filter((k) => k === f);
+        if (!keys.length) {
+          selectEl.innerHTML = '<option value="">Nenhum projeto desta empresa</option>';
+          return;
+        }
+      }
       selectEl.innerHTML = keys
         .map((cn) => {
           const opts = byClient[cn]
@@ -2054,7 +2605,7 @@
   }
 
   async function refreshProjetoSelects(prefId) {
-    await fillProjetoOptgroups($("#modal-diario-projeto"), prefId);
+    await fillProjetoOptgroups($("#modal-diario-projeto"), prefId, diarioModalClienteFilter);
   }
 
   function consumeDiarioProjetoPrefill() {
@@ -2072,11 +2623,35 @@
     $("#modal-diario-log-id").value = "";
     $("#modal-diario-title").textContent = "Nova ocorrência";
     $("#modal-diario-submit").textContent = "Registrar no dia";
+    diarioModalClienteFilter = null;
     updateDiarioDateMax();
     const pid = consumeDiarioProjetoPrefill();
-    await fillProjetoOptgroups($("#modal-diario-projeto"), pid);
-    setDiarioTimeNow();
+    await fillProjetoOptgroups($("#modal-diario-projeto"), pid, null);
+    applyDiarioModalTimesForSelectedProjeto();
     $("#modal-diario-overlay").hidden = false;
+  }
+
+  async function openDiarioModalFromEmpresa(emp) {
+    $("#modal-diario-log-id").value = "";
+    $("#modal-diario-title").textContent = "Nova ocorrência";
+    $("#modal-diario-submit").textContent = "Registrar no dia";
+    $("#modal-diario-desc").value = "";
+    diarioModalClienteFilter = emp;
+    updateDiarioDateMax();
+    try {
+      await fillProjetoOptgroups($("#modal-diario-projeto"), null, emp);
+      const sel = $("#modal-diario-projeto");
+      if (!sel.value) {
+        diarioModalClienteFilter = null;
+        toast("Não há projeto cadastrado para esta empresa.", true);
+        return;
+      }
+      applyDiarioModalTimesForSelectedProjeto();
+      $("#modal-diario-overlay").hidden = false;
+    } catch (e) {
+      diarioModalClienteFilter = null;
+      toast(e.message, true);
+    }
   }
 
   async function openDiarioModalEdit(logId) {
@@ -2086,10 +2661,19 @@
       $("#modal-diario-log-id").value = String(row.id);
       $("#modal-diario-title").textContent = "Editar ocorrência";
       $("#modal-diario-submit").textContent = "Salvar alterações";
-      await fillProjetoOptgroups($("#modal-diario-projeto"), row.projeto_id);
+      diarioModalClienteFilter = null;
+      await fillProjetoOptgroups($("#modal-diario-projeto"), row.projeto_id, null);
       const tm = timeFromDataHora(row.data_hora);
       $("#modal-diario-hora").value = tm || "09:00";
-      $("#modal-diario-duracao").value = String(row.duracao_minutos ?? "");
+      let endTm = "";
+      if (row.data_hora_fim) {
+        endTm = timeFromDataHora(row.data_hora_fim);
+      }
+      if (!endTm) {
+        const fake = { data_hora: row.data_hora, duracao_minutos: row.duracao_minutos, data_hora_fim: null };
+        endTm = diarioEndHM(fake) || defaultEndFromStart(tm || "09:00");
+      }
+      $("#modal-diario-hora-fim").value = endTm;
       $("#modal-diario-categoria").value = row.categoria || "outro";
       $("#modal-diario-desc").value = row.descricao || "";
       $("#modal-diario-overlay").hidden = false;
@@ -2098,39 +2682,301 @@
     }
   }
 
-  function bindOverlayDismiss(overlaySel, closeSel) {
+  function bindOverlayDismiss(overlaySel, closeSel, onClose) {
     const ov = $(overlaySel);
-    $(closeSel).addEventListener("click", () => {
+    const close = () => {
       ov.hidden = true;
-    });
+      if (typeof onClose === "function") onClose();
+    };
+    $(closeSel).addEventListener("click", close);
     ov.addEventListener("click", (e) => {
-      if (e.target === ov) ov.hidden = true;
+      if (e.target === ov) close();
     });
   }
 
-  bindOverlayDismiss("#modal-diario-overlay", "#modal-diario-close");
+  bindOverlayDismiss("#modal-diario-overlay", "#modal-diario-close", () => {
+    diarioModalClienteFilter = null;
+  });
   bindOverlayDismiss("#modal-novo-proj-overlay", "#modal-novo-proj-close");
   bindOverlayDismiss("#modal-projeto-overlay", "#modal-projeto-close");
+
+  function initialsFromName(name) {
+    const s = String(name || "").trim();
+    if (!s) return "—";
+    const p = s.split(/\s+/).filter(Boolean);
+    if (p.length >= 2) return (p[0][0] + p[p.length - 1][0]).toUpperCase();
+    return s.slice(0, 2).toUpperCase();
+  }
+
+  function collapsePerfilSenhaPanel() {
+    const panel = $("#perfil-senha-panel");
+    const btn = $("#btn-toggle-perfil-senha");
+    if (panel) panel.hidden = true;
+    if (btn) {
+      btn.setAttribute("aria-expanded", "false");
+      btn.textContent = "Alterar senha…";
+    }
+  }
+
+  function resetPerfilSensitiveUi() {
+    collapsePerfilSenhaPanel();
+    $("#perfil-senha-atual").value = "";
+    $("#perfil-senha-nova").value = "";
+    $("#perfil-senha-nova2").value = "";
+    const fi = $("#perfil-avatar-file");
+    if (fi) fi.value = "";
+  }
+
+  bindOverlayDismiss("#modal-perfil-overlay", "#modal-perfil-close", resetPerfilSensitiveUi);
+
+  function setHeaderAvatarFromTem(tem) {
+    const img = $("#header-user-avatar-img");
+    const fb = $("#header-user-avatar");
+    if (!img || !fb) return;
+    img.onload = null;
+    img.onerror = null;
+    if (!tem) {
+      img.removeAttribute("src");
+      img.classList.remove("is-visible");
+      fb.classList.remove("is-hidden");
+      return;
+    }
+    const applyVisible = () => {
+      img.classList.add("is-visible");
+      fb.classList.add("is-hidden");
+    };
+    const applyFallback = () => {
+      img.classList.remove("is-visible");
+      fb.classList.remove("is-hidden");
+      img.removeAttribute("src");
+    };
+    img.onerror = applyFallback;
+    img.onload = applyVisible;
+    const url = `${apiBase()}/api/auth/avatar?ts=${Date.now()}`;
+    img.src = url;
+    if (img.complete && img.naturalWidth > 0) {
+      applyVisible();
+    }
+  }
+
+  function setPerfilPreviewFromTem(tem) {
+    const pr = $("#perfil-avatar-preview");
+    if (!pr) return;
+    pr.onload = null;
+    pr.onerror = null;
+    if (!tem) {
+      pr.removeAttribute("src");
+      return;
+    }
+    pr.onerror = () => pr.removeAttribute("src");
+    pr.src = `${apiBase()}/api/auth/avatar?ts=${Date.now()}`;
+  }
+
+  function userHasAvatarFromApi(u) {
+    const v = u && u.tem_avatar;
+    if (v === true || v === 1) return true;
+    if (v === false || v === 0 || v == null) return false;
+    if (typeof v === "string") {
+      const s = v.trim().toLowerCase();
+      return s === "1" || s === "true";
+    }
+    const n = Number(v);
+    if (!Number.isNaN(n)) return n !== 0;
+    return false;
+  }
+
+  async function refreshUserShell() {
+    try {
+      const data = await apiGet("/api/auth/me");
+      const u = data.user || {};
+      const nm = u.nome_exibicao || u.username || "—";
+      $("#header-user-name").textContent = nm;
+      $("#header-user-avatar").textContent = initialsFromName(nm);
+      const tem = userHasAvatarFromApi(u);
+      setHeaderAvatarFromTem(tem);
+      setPerfilPreviewFromTem(tem);
+      $("#perfil-user-login").textContent = u.username || "—";
+      $("#perfil-nome").value = u.nome_exibicao || "";
+      $("#perfil-email").value = u.email || "";
+      $("#perfil-telefone").value = u.telefone || "";
+      $("#perfil-cargo").value = u.cargo || "";
+      $("#perfil-bio").value = u.bio || "";
+    } catch (_) {}
+  }
+
+  function applySidebarCollapsedFromLS() {
+    if (window.matchMedia("(max-width: 860px)").matches) return;
+    try {
+      if (localStorage.getItem(LS_SIDEBAR_COLLAPSED) === "1") {
+        document.documentElement.setAttribute("data-sidebar-collapsed", "true");
+      }
+    } catch (_) {}
+  }
+
+  function syncSidebarCollapsedUI() {
+    const on = document.documentElement.getAttribute("data-sidebar-collapsed") === "true";
+    const btn = $("#btn-sidebar-collapse");
+    if (btn) btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  $("#btn-sidebar-collapse").addEventListener("click", () => {
+    if (window.matchMedia("(max-width: 860px)").matches) return;
+    const cur = document.documentElement.getAttribute("data-sidebar-collapsed") === "true";
+    if (cur) {
+      document.documentElement.removeAttribute("data-sidebar-collapsed");
+      try {
+        localStorage.removeItem(LS_SIDEBAR_COLLAPSED);
+      } catch (_) {}
+    } else {
+      document.documentElement.setAttribute("data-sidebar-collapsed", "true");
+      try {
+        localStorage.setItem(LS_SIDEBAR_COLLAPSED, "1");
+      } catch (_) {}
+    }
+    syncSidebarCollapsedUI();
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.matchMedia("(max-width: 860px)").matches) {
+      document.documentElement.removeAttribute("data-sidebar-collapsed");
+    } else {
+      applySidebarCollapsedFromLS();
+    }
+    syncSidebarCollapsedUI();
+  });
+
+  $("#header-profile-open").addEventListener("click", async () => {
+    resetPerfilSensitiveUi();
+    await refreshUserShell();
+    $("#modal-perfil-overlay").hidden = false;
+  });
+
+  $("#btn-toggle-perfil-senha").addEventListener("click", () => {
+    const panel = $("#perfil-senha-panel");
+    const btn = $("#btn-toggle-perfil-senha");
+    const willOpen = !!(panel && panel.hidden);
+    if (panel) panel.hidden = !willOpen;
+    if (btn) {
+      btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      btn.textContent = willOpen ? "Ocultar alteração de senha" : "Alterar senha…";
+    }
+    if (willOpen) $("#perfil-senha-atual").focus();
+  });
+
+  $("#perfil-avatar-pick").addEventListener("click", () => {
+    $("#perfil-avatar-file").click();
+  });
+
+  $("#perfil-avatar-file").addEventListener("change", async () => {
+    const inp = $("#perfil-avatar-file");
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    const fd = new FormData();
+    fd.append("arquivo", f);
+    try {
+      await apiPostForm("/api/auth/avatar", fd);
+      toast("Foto atualizada.");
+      inp.value = "";
+      await refreshUserShell();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  $("#perfil-avatar-remove").addEventListener("click", async () => {
+    if (!confirm("Remover a foto do perfil do banco de dados?")) return;
+    try {
+      await apiDelete("/api/auth/avatar");
+      toast("Foto removida.");
+      await refreshUserShell();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  $("#form-perfil-dados").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const body = {
+      nome_exibicao: $("#perfil-nome").value.trim(),
+      email: $("#perfil-email").value.trim(),
+      telefone: $("#perfil-telefone").value.trim(),
+      cargo: $("#perfil-cargo").value.trim(),
+      bio: $("#perfil-bio").value.trim(),
+    };
+    if (!body.nome_exibicao) return toast("Informe o nome de exibição.", true);
+    try {
+      await apiPut("/api/auth/profile", body);
+      toast("Perfil atualizado.");
+      await refreshUserShell();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  $("#form-perfil-senha").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const senha_atual = $("#perfil-senha-atual").value;
+    const senha_nova = $("#perfil-senha-nova").value;
+    const senha_nova_confirma = $("#perfil-senha-nova2").value;
+    try {
+      await apiPut("/api/auth/password", { senha_atual, senha_nova, senha_nova_confirma });
+      toast("Senha alterada.");
+      $("#perfil-senha-atual").value = "";
+      $("#perfil-senha-nova").value = "";
+      $("#perfil-senha-nova2").value = "";
+      collapsePerfilSenhaPanel();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
+
+  async function logoutToLogin() {
+    try {
+      await apiPost("/api/auth/logout", {});
+      window.location.href = "/login.html";
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  $("#btn-perfil-logout").addEventListener("click", () => {
+    void logoutToLogin();
+  });
+
+  $("#sidebar-btn-logout").addEventListener("click", () => {
+    void logoutToLogin();
+  });
 
   $("#form-diario-modal").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const projeto_id = parseInt($("#modal-diario-projeto").value, 10);
-    const duracao_minutos = parseInt($("#modal-diario-duracao").value, 10);
+    if (!Number.isFinite(projeto_id) || projeto_id <= 0) return toast("Selecione um projeto.", true);
     const descricao = $("#modal-diario-desc").value.trim();
     const categoria = $("#modal-diario-categoria").value;
     const timeVal = $("#modal-diario-hora").value;
-    if (!timeVal) return toast("Informe o horário.", true);
+    const timeEnd = $("#modal-diario-hora-fim").value;
+    if (!timeVal) return toast("Informe o horário de início.", true);
+    if (!timeEnd) return toast("Informe o horário de término.", true);
+    if (timeEnd <= timeVal) return toast("O horário de término deve ser depois do início (mesmo dia).", true);
     const d = $("#diario-data").value || todayIso();
     if (!d) return toast("Selecione o dia.", true);
     if (d > todayIso()) return toast("Use apenas hoje ou dias anteriores.", true);
     const body = {
       projeto_id,
-      duracao_minutos,
       descricao,
       categoria,
       data_hora: `${d} ${timeVal}:00`,
+      data_hora_fim: `${d} ${timeEnd}:00`,
     };
     const logIdRaw = $("#modal-diario-log-id").value.trim();
+    const startDt = parseLocalDayTime(body.data_hora);
+    const lastSame = lastEndForProjetoJs(projeto_id, logIdRaw || null);
+    if (startDt && lastSame && startDt < lastSame) {
+      return toast(
+        "O início deve ser no mesmo dia e depois do término da última atividade deste projeto.",
+        true
+      );
+    }
     try {
       if (logIdRaw) {
         await apiPut("/api/logs/" + encodeURIComponent(logIdRaw), body);
@@ -2141,18 +2987,28 @@
       }
       $("#modal-diario-log-id").value = "";
       $("#modal-diario-desc").value = "";
-      $("#modal-diario-duracao").value = "";
+      $("#modal-diario-hora-fim").value = "";
       $("#modal-diario-title").textContent = "Nova ocorrência";
       $("#modal-diario-submit").textContent = "Registrar no dia";
       $("#modal-diario-overlay").hidden = true;
-      setDiarioTimeNow();
+      diarioModalClienteFilter = null;
       await loadDiario();
     } catch (e) {
       toast(e.message, true);
     }
   });
 
+  $("#modal-diario-projeto").addEventListener("change", () => {
+    applyDiarioModalTimesForSelectedProjeto();
+  });
+
   $("#diario-board").addEventListener("click", async (e) => {
+    const plusBtn = /** @type {HTMLElement | null} */ (e.target.closest(".btn-diario-section-plus"));
+    if (plusBtn && plusBtn.dataset.diarioEmpresa) {
+      const emp = decodeURIComponent(plusBtn.dataset.diarioEmpresa);
+      await openDiarioModalFromEmpresa(emp);
+      return;
+    }
     const editBtn = /** @type {HTMLElement | null} */ (e.target.closest(".diario-btn-edit"));
     const delBtn = /** @type {HTMLElement | null} */ (e.target.closest(".diario-btn-del"));
     if (editBtn) {
@@ -2302,12 +3158,14 @@
       const hist = atividades.length
         ? atividades
             .map((a) => {
+              const t0 = String(a.data_hora || "").replace("T", " ").slice(11, 16);
+              const t1 = diarioEndHM(a) || "—";
               const when = String(a.data_hora || "").replace("T", " ").slice(0, 16);
               const cat = categoriaLabelPt(a.categoria);
               return `<div class="projeto-atividade-item">
-            <div><strong>${escapeHtml(when)}</strong> · ${escapeHtml(cat)} · ${escapeHtml(String(a.duracao_minutos))} min</div>
+            <div><strong>${escapeHtml(t0)}–${escapeHtml(t1)}</strong> · ${escapeHtml(cat)} · ${escapeHtml(String(a.duracao_minutos))} min</div>
             <div>${escapeHtml(a.descricao || "")}</div>
-            <div class="projeto-atividade-meta">${escapeHtml(a.cliente_nome || "")}</div>
+            <div class="projeto-atividade-meta">${escapeHtml(when)} · ${escapeHtml(a.cliente_nome || "")}</div>
           </div>`;
             })
             .join("")
@@ -2710,7 +3568,12 @@
 
   setupBellPanel();
   bootstrapNotifications();
-  refreshProjetoSelects();
+  applySidebarCollapsedFromLS();
+  syncSidebarCollapsedUI();
+  (async () => {
+    await refreshUserShell();
+    await refreshProjetoSelects();
+  })();
   setDiarioTimeNow();
   syncThemeControls();
 })();

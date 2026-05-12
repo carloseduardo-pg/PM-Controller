@@ -2,6 +2,11 @@
 """
 Script de criação do banco MariaDB para o Diário de Bordo de P.O. (PWA).
 
+Cria também a tabela **usuarios** (login na API Flask), com foto de perfil opcional
+(**avatar_blob** / **avatar_mime** no MariaDB), e o usuário inicial **cadu**
+(senha **senha123**), se ainda não existir. Em produção, altere a senha pelo perfil
+na interface ou diretamente no banco após o primeiro acesso.
+
 Formas de executar (na raiz do projeto "PM Controller"):
   python -m backend.criar_banco
 
@@ -37,6 +42,31 @@ except ModuleNotFoundError:
 from backend.config import DB_NAME, get_connection
 
 
+def garantir_usuario_padrao(cursor: _SqlCursor) -> None:
+    """Um único usuário inicial: cadu / senha123 (werkzeug, mesmo algoritmo da API)."""
+    try:
+        from werkzeug.security import generate_password_hash
+    except ModuleNotFoundError:
+        print(
+            "Dependência ausente: Werkzeug (use `pip install Werkzeug` ou `pip install -r requirements.txt`).",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from None
+
+    cursor.execute(f"USE `{DB_NAME}`")
+    cursor.execute("SELECT id FROM usuarios WHERE username = %s", ("cadu",))
+    if cursor.fetchone():
+        return
+    h = generate_password_hash("senha123")
+    cursor.execute(
+        """
+        INSERT INTO usuarios (username, senha_hash, nome_exibicao, email)
+        VALUES (%s, %s, %s, %s)
+        """,
+        ("cadu", h, "Nome do Usuário", None),
+    )
+
+
 class _SqlCursor(Protocol):
     def execute(self, operation: str, params: Any | None = None, multi: bool = False) -> Any: ...
 
@@ -51,6 +81,45 @@ def criar_esquema(cursor: _SqlCursor) -> None:
         "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
     )
     cursor.execute(f"USE `{DB_NAME}`")
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            username VARCHAR(64) NOT NULL,
+            senha_hash VARCHAR(255) NOT NULL,
+            nome_exibicao VARCHAR(255) NOT NULL DEFAULT '',
+            email VARCHAR(255) NULL,
+            telefone VARCHAR(64) NULL,
+            cargo VARCHAR(128) NULL,
+            bio TEXT NULL,
+            avatar_mime VARCHAR(127) NULL,
+            avatar_blob MEDIUMBLOB NULL,
+            criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_usuarios_username (username)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """
+    )
+
+    for col_sql in (
+        "ADD COLUMN avatar_mime VARCHAR(127) NULL AFTER bio",
+        "ADD COLUMN avatar_blob MEDIUMBLOB NULL AFTER avatar_mime",
+    ):
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS c FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'usuarios'
+              AND COLUMN_NAME = %s
+            """,
+            (col_sql.split()[2],),
+        )
+        col_row = cursor.fetchone()
+        n = int(col_row["c"]) if col_row and col_row.get("c") is not None else 0
+        if n == 0:
+            cursor.execute(f"ALTER TABLE usuarios {col_sql}")
 
     cursor.execute(
         """
@@ -83,6 +152,7 @@ def criar_esquema(cursor: _SqlCursor) -> None:
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
             projeto_id INT UNSIGNED NOT NULL,
             data_hora DATETIME NOT NULL,
+            data_hora_fim DATETIME NULL,
             categoria ENUM(
                 'reuniao',
                 'desenvolvimento',
@@ -102,6 +172,32 @@ def criar_esquema(cursor: _SqlCursor) -> None:
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """
     )
+
+    cursor.execute(
+        """
+        SELECT COUNT(*) AS c FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'logs_diarios'
+          AND COLUMN_NAME = 'data_hora_fim'
+        """
+    )
+    col_row = cursor.fetchone()
+    n = int(col_row["c"]) if col_row and col_row.get("c") is not None else 0
+    if n == 0:
+        cursor.execute(
+            """
+            ALTER TABLE logs_diarios
+            ADD COLUMN data_hora_fim DATETIME NULL
+            AFTER data_hora
+            """
+        )
+        cursor.execute(
+            """
+            UPDATE logs_diarios
+            SET data_hora_fim = DATE_ADD(data_hora, INTERVAL duracao_minutos MINUTE)
+            WHERE data_hora_fim IS NULL
+            """
+        )
 
     cursor.execute(
         """
@@ -171,22 +267,28 @@ def popular_dados_teste(cursor: _SqlCursor) -> None:
     )
 
     base = datetime(2026, 5, 5, 9, 0, 0)
+
+    def _log_row(
+        pid: int, start: datetime, cat: str, desc: str, mins: int
+    ) -> tuple[Any, ...]:
+        return (pid, start, start + timedelta(minutes=mins), cat, desc, mins)
+
     logs: list[tuple[Any, ...]] = [
-        (1, base + timedelta(days=0, hours=2), "planejamento", "Kickoff e escopo do portal.", 120),
-        (1, base + timedelta(days=0, hours=5), "reuniao", "Alinhamento com stakeholders.", 90),
-        (1, base + timedelta(days=1, hours=1), "desenvolvimento", "Revisão de PRs e backlog.", 45),
-        (2, base + timedelta(days=1, hours=4), "suporte", "Esclarecimento de regra de negócio.", 30),
-        (2, base + timedelta(days=2, hours=0), "documentacao", "Atualização do RFC da integração.", 180),
-        (3, base + timedelta(days=2, hours=4), "reuniao", "Demo interna do MVP.", 60),
-        (3, base + timedelta(days=3, hours=2), "desenvolvimento", "Testes E2E e ajustes finais.", 240),
-        (1, base + timedelta(days=3, hours=8), "outro", "Retrospectiva rápida.", 15),
-        (2, base + timedelta(days=4, hours=1), "planejamento", "Planejamento da próxima sprint.", 75),
+        _log_row(1, base + timedelta(days=0, hours=2), "planejamento", "Kickoff e escopo do portal.", 120),
+        _log_row(1, base + timedelta(days=0, hours=5), "reuniao", "Alinhamento com stakeholders.", 90),
+        _log_row(1, base + timedelta(days=1, hours=1), "desenvolvimento", "Revisão de PRs e backlog.", 45),
+        _log_row(2, base + timedelta(days=1, hours=4), "suporte", "Esclarecimento de regra de negócio.", 30),
+        _log_row(2, base + timedelta(days=2, hours=0), "documentacao", "Atualização do RFC da integração.", 180),
+        _log_row(3, base + timedelta(days=2, hours=4), "reuniao", "Demo interna do MVP.", 60),
+        _log_row(3, base + timedelta(days=3, hours=2), "desenvolvimento", "Testes E2E e ajustes finais.", 240),
+        _log_row(1, base + timedelta(days=3, hours=8), "outro", "Retrospectiva rápida.", 15),
+        _log_row(2, base + timedelta(days=4, hours=1), "planejamento", "Planejamento da próxima sprint.", 75),
     ]
 
     cursor.executemany(
         """
-        INSERT INTO logs_diarios (projeto_id, data_hora, categoria, descricao, duracao_minutos)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO logs_diarios (projeto_id, data_hora, data_hora_fim, categoria, descricao, duracao_minutos)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """,
         logs,
     )
@@ -236,6 +338,7 @@ def main() -> int:
 
         try:
             criar_esquema(cursor)
+            garantir_usuario_padrao(cursor)
             popular_dados_teste(cursor)
             conn.commit()
         except Error:
@@ -245,7 +348,8 @@ def main() -> int:
             cursor.close()
 
         print(f"Banco `{DB_NAME}` criado/atualizado com sucesso.")
-        print("Dados de teste inseridos (se o banco estava vazio).")
+        print("Login da aplicação: usuário cadu (criado se não existia; senha inicial senha123).")
+        print("Dados de teste inseridos (se o banco estava vazio de clientes/projetos).")
         return 0
 
     except Error as e:

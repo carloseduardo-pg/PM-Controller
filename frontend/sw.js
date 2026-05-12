@@ -1,11 +1,14 @@
 /* PO Diary — cache da interface e fallback offline básico */
-const CACHE = "po-diary-shell-v4";
+const CACHE = "po-diary-shell-v7";
 const PRECACHE = [
   "/",
   "/index.html",
+  "/login.html",
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/imagens/logo_daily.png",
+  "/imagens/logo_empresarial_daily.png",
 ];
 
 self.addEventListener("install", (event) => {

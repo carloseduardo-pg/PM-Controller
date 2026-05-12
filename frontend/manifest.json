@@ -1,15 +1,15 @@
 {
-  "name": "PO Diary",
-  "short_name": "PO Diary",
-  "description": "Diário de Bordo de P.O. — registro, relatório, agenda e dashboard interativo.",
+  "name": "DAILY",
+  "short_name": "DAILY",
+  "description": "DAILY — registro de atividades, relatório, agenda e dashboard.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "lang": "pt-BR",
   "dir": "ltr",
-  "background_color": "#1e1f21",
-  "theme_color": "#1e1f21",
+  "background_color": "#e9ecf3",
+  "theme_color": "#1e5bb4",
   "categories": ["productivity", "business"],
   "icons": [
     {

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#E8ECF3" id="meta-theme-color" />
+  <meta name="description" content="Entrar — DAILY" />
+  <title>Entrar · DAILY</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("po_theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+          var m = document.getElementById("meta-theme-color");
+          if (m) m.setAttribute("content", "#0c1018");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="/imagens/logo_daily.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --daily-blue: #1e5bb4;
+      --daily-green: #2ecc71;
+      --bg-page: #e9ecf3;
+      --bg-card: #ffffff;
+      --border-subtle: rgba(26, 32, 44, 0.1);
+      --border-strong: rgba(26, 32, 44, 0.16);
+      --text: #1a1f2e;
+      --text-muted: rgba(26, 31, 46, 0.62);
+      --accent: #1e5bb4;
+      --accent-soft: rgba(30, 91, 180, 0.14);
+      --secondary: #2ecc71;
+      --secondary-soft: rgba(46, 204, 113, 0.18);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --shadow-card: 0 2px 8px rgba(15, 25, 48, 0.07), 0 8px 24px rgba(15, 25, 48, 0.05);
+      --overlay-backdrop: rgba(12, 16, 24, 0.52);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-page: #0c1018;
+      --bg-card: #1a2233;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --text: #eef2fb;
+      --text-muted: rgba(228, 234, 248, 0.58);
+      --accent: #5ea8ff;
+      --accent-soft: rgba(94, 168, 255, 0.18);
+      --secondary: #3dd68d;
+      --secondary-soft: rgba(61, 214, 141, 0.2);
+      --shadow-card: 0 4px 28px rgba(0, 0, 0, 0.45);
+      --overlay-backdrop: rgba(0, 0, 0, 0.68);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font);
+      background: var(--bg-page);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input {
+      font: inherit;
+      color: inherit;
+    }
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem 2.5rem;
+      background-color: var(--bg-page);
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%231e5bb4' fill-opacity='0.07'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM27 41.34l-11-6.35v-13l11 6.35v13zm0-18.49L16 16.6v-13l11 6.35v13zm1-16.17l-13-7.5v-2.31l13 7.5v2.31zm0 35.18l-13 7.5V49h2v-6.35L28 42.31v-2.3zM15 0h-2v6.35L0 12.69v2.3l13 7.5V7.5L15 0zm0 49h-2v-6.35L0 35.81v-2.3l13-7.5v15L15 49z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .login-stack {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .login-hero-brand {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+    }
+    .login-card {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 1.25rem 1.5rem 1.5rem;
+    }
+    .login-card-lead {
+      margin: 0 0 0.85rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .field-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .input {
+      width: 100%;
+      padding: 0.55rem 0.65rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-page);
+      margin-bottom: 0.85rem;
+    }
+    html[data-theme="dark"] .input { background: #222b3e; }
+    .input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .btn-primary {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.65rem 1rem;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    html[data-theme="dark"] .btn-primary {
+      background: var(--accent);
+      color: #0c1018;
+    }
+    .btn-primary:hover { filter: brightness(1.06); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 1.1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+    }
+    .login-links button {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    html[data-theme="dark"] .login-links button { color: var(--accent); }
+    .theme-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.75rem;
+    }
+    .theme-row button {
+      font-size: 0.72rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-page);
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .login-msg {
+      font-size: 0.82rem;
+      color: #b45309;
+      margin-bottom: 0.75rem;
+      min-height: 1.25em;
+    }
+    html[data-theme="dark"] .login-msg { color: #fbbf24; }
+    .login-msg.err { color: #c2410c; }
+    html[data-theme="dark"] .login-msg.err { color: #fca5a5; }
+
+    .stub-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 100;
+    }
+    .stub-overlay[hidden] { display: none !important; }
+    .stub-sheet {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      max-width: 400px;
+      width: 100%;
+      padding: 1.25rem 1.25rem 1rem;
+      box-shadow: var(--shadow-card);
+    }
+    .stub-sheet h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+    .stub-sheet p {
+      margin: 0 0 1rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .stub-sheet button {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-page);
+      cursor: pointer;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-stack">
+      <img
+        class="login-hero-brand"
+        src="/imagens/logo_empresarial_daily.png"
+        alt="DAILY — Corporate Productivity Simplified"
+        width="800"
+        height="400"
+        decoding="async"
+      />
+      <div class="login-card">
+        <div class="theme-row">
+          <button type="button" id="login-theme-toggle" aria-label="Alternar tema claro ou escuro">Claro / Escuro</button>
+        </div>
+        <p class="login-card-lead">Acesse com seu usuário e senha.</p>
+        <p id="login-msg" class="login-msg" aria-live="polite"></p>
+        <form id="form-login">
+          <label class="field-label" for="login-user">Usuário</label>
+          <input id="login-user" class="input" name="username" autocomplete="username" required />
+          <label class="field-label" for="login-pass">Senha</label>
+          <input id="login-pass" class="input" name="password" type="password" autocomplete="current-password" required />
+          <button type="submit" class="btn-primary" id="login-submit">Entrar</button>
+        </form>
+        <div class="login-links">
+          <button type="button" data-stub="forgot">Esqueci minha senha</button>
+          <button type="button" data-stub="signup">Criar conta</button>
+          <button type="button" data-stub="contact">Primeiro contato</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="stub-overlay" class="stub-overlay" hidden role="dialog" aria-modal="true">
+    <div class="stub-sheet">
+      <h2 id="stub-title"></h2>
+      <p id="stub-body"></p>
+      <button type="button" id="stub-close">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var LS_THEME = "po_theme";
+      function apiBase() {
+        if (typeof location !== "undefined" && (location.protocol === "http:" || location.protocol === "https:")) {
+          return location.origin.replace(/\/$/, "");
+        }
+        return "http://localhost:5000";
+      }
+      function applyTheme(dark) {
+        if (dark) document.documentElement.setAttribute("data-theme", "dark");
+        else document.documentElement.removeAttribute("data-theme");
+        try {
+          localStorage.setItem(LS_THEME, dark ? "dark" : "light");
+        } catch (e) {}
+        var m = document.getElementById("meta-theme-color");
+        if (m) m.setAttribute("content", dark ? "#0c1018" : "#E8ECF3");
+      }
+      document.getElementById("login-theme-toggle").addEventListener("click", function () {
+        applyTheme(document.documentElement.getAttribute("data-theme") !== "dark");
+      });
+
+      var stubs = {
+        forgot: {
+          title: "Esqueci minha senha",
+          body: "Esta instalação é de uso individual. Redefina a senha pelo menu de perfil (após entrar) ou peça ao administrador do servidor. Em ambiente de desenvolvimento você pode recriar o usuário executando o script de banco.",
+        },
+        signup: {
+          title: "Criar conta",
+          body: "Novos cadastros públicos estão desativados. Apenas o administrador pode criar usuários no banco de dados. Entre em contato se precisar de acesso.",
+        },
+        contact: {
+          title: "Primeiro contato",
+          body: "Para suporte ou onboarding, fale com o responsável pela instalação do DAILY. O usuário inicial é criado automaticamente pelo script criar_banco.",
+        },
+      };
+      var ov = document.getElementById("stub-overlay");
+      document.querySelectorAll("[data-stub]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var key = btn.getAttribute("data-stub");
+          var s = stubs[key];
+          if (!s) return;
+          document.getElementById("stub-title").textContent = s.title;
+          document.getElementById("stub-body").textContent = s.body;
+          ov.hidden = false;
+        });
+      });
+      document.getElementById("stub-close").addEventListener("click", function () {
+        ov.hidden = true;
+      });
+      ov.addEventListener("click", function (e) {
+        if (e.target === ov) ov.hidden = true;
+      });
+
+      var form = document.getElementById("form-login");
+      var msg = document.getElementById("login-msg");
+      var submit = document.getElementById("login-submit");
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        msg.textContent = "";
+        msg.classList.remove("err");
+        submit.disabled = true;
+        var u = document.getElementById("login-user").value.trim();
+        var p = document.getElementById("login-pass").value;
+        fetch(apiBase() + "/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: u, password: p }),
+          credentials: "same-origin",
+        })
+          .then(function (r) {
+            return r.text().then(function (t) {
+              var body = {};
+              try {
+                body = t ? JSON.parse(t) : {};
+              } catch (_) {}
+              return { ok: r.ok, status: r.status, body: body };
+            });
+          })
+          .then(function (res) {
+            submit.disabled = false;
+            if (res.ok && res.body && res.body.ok) {
+              window.location.href = "/";
+              return;
+            }
+            var err = (res.body && (res.body.erro || res.body.error)) || "Não foi possível entrar.";
+            msg.textContent = err;
+            msg.classList.add("err");
+          })
+          .catch(function () {
+            submit.disabled = false;
+            msg.textContent = "Sem conexão com o servidor.";
+            msg.classList.add("err");
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
