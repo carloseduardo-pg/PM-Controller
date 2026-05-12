@@ -1260,15 +1260,20 @@ def _user_public_dict(row: dict[str, Any]) -> dict[str, Any]:
     raw_tem = row.get("tem_avatar")
     if raw_tem is None:
         ab = row.get("avatar_blob")
-        if isinstance(ab, (bytes, bytearray)):
-            tem = len(ab) > 0
+        if isinstance(ab, (bytes, bytearray, memoryview)):
+            tem = len(bytes(ab)) > 0
         else:
             tem = False
+    elif isinstance(raw_tem, bool):
+        tem = raw_tem
+    elif isinstance(raw_tem, (bytes, bytearray, memoryview)):
+        tem = len(bytes(raw_tem)) > 0
     else:
         try:
             tem = int(raw_tem) != 0
         except (TypeError, ValueError):
-            tem = bool(raw_tem)
+            s = str(raw_tem).strip().lower()
+            tem = s in ("1", "true", "yes")
     return {
         "id": int(row["id"]),
         "username": row.get("username") or "",
@@ -1277,7 +1282,7 @@ def _user_public_dict(row: dict[str, Any]) -> dict[str, Any]:
         "telefone": row.get("telefone") or "",
         "cargo": row.get("cargo") or "",
         "bio": row.get("bio") or "",
-        "tem_avatar": tem,
+        "tem_avatar": bool(tem),
     }
 
 

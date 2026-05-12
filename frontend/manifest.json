@@ -8,8 +8,8 @@
   "orientation": "any",
   "lang": "pt-BR",
   "dir": "ltr",
-  "background_color": "#e9ecf3",
-  "theme_color": "#1e5bb4",
+  "background_color": "#fafafa",
+  "theme_color": "#2563eb",
   "categories": ["productivity", "business"],
   "icons": [
     {

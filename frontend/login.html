@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#E8ECF3" id="meta-theme-color" />
+  <meta name="theme-color" content="#fafafa" id="meta-theme-color" />
   <meta name="description" content="Entrar — DAILY" />
   <title>Entrar · DAILY</title>
   <script>
@@ -12,7 +12,7 @@
         if (localStorage.getItem("po_theme") === "dark") {
           document.documentElement.setAttribute("data-theme", "dark");
           var m = document.getElementById("meta-theme-color");
-          if (m) m.setAttribute("content", "#0c1018");
+          if (m) m.setAttribute("content", "#0f0f0f");
         }
       } catch (e) {}
     })();
@@ -20,42 +20,49 @@
   <link rel="icon" href="/imagens/logo_daily.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Roboto+Slab:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       color-scheme: light;
-      --daily-blue: #1e5bb4;
-      --daily-green: #2ecc71;
-      --bg-page: #e9ecf3;
+      --daily-blue: #2563eb;
+      --daily-green: #22c55e;
+      --heading-navy: #111827;
+      --bg-page: #fafafa;
       --bg-card: #ffffff;
-      --border-subtle: rgba(26, 32, 44, 0.1);
-      --border-strong: rgba(26, 32, 44, 0.16);
-      --text: #1a1f2e;
-      --text-muted: rgba(26, 31, 46, 0.62);
-      --accent: #1e5bb4;
-      --accent-soft: rgba(30, 91, 180, 0.14);
-      --secondary: #2ecc71;
-      --secondary-soft: rgba(46, 204, 113, 0.18);
-      --radius-lg: 16px;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.14);
+      --text: #1a1a1a;
+      --text-muted: rgba(26, 26, 26, 0.62);
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.14);
+      --secondary: #22c55e;
+      --secondary-soft: rgba(34, 197, 94, 0.16);
+      --radius-lg: 18px;
       --radius-md: 12px;
       --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      --shadow-card: 0 2px 8px rgba(15, 25, 48, 0.07), 0 8px 24px rgba(15, 25, 48, 0.05);
-      --overlay-backdrop: rgba(12, 16, 24, 0.52);
+      --font-display: "Roboto Slab", Georgia, "Times New Roman", serif;
+      --font-mono: "Roboto Mono", ui-monospace, monospace;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 14px rgba(0, 0, 0, 0.04);
+      --overlay-backdrop: rgba(0, 0, 0, 0.48);
+      --login-hex-1: rgba(37, 99, 235, 0.11);
+      --login-hex-2: rgba(34, 197, 94, 0.09);
     }
     html[data-theme="dark"] {
       color-scheme: dark;
-      --bg-page: #0c1018;
-      --bg-card: #1a2233;
+      --bg-page: #0f0f0f;
+      --bg-card: #222222;
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-strong: rgba(255, 255, 255, 0.14);
-      --text: #eef2fb;
-      --text-muted: rgba(228, 234, 248, 0.58);
-      --accent: #5ea8ff;
-      --accent-soft: rgba(94, 168, 255, 0.18);
-      --secondary: #3dd68d;
-      --secondary-soft: rgba(61, 214, 141, 0.2);
-      --shadow-card: 0 4px 28px rgba(0, 0, 0, 0.45);
-      --overlay-backdrop: rgba(0, 0, 0, 0.68);
+      --text: #ececec;
+      --text-muted: rgba(236, 236, 236, 0.58);
+      --accent: #4ade80;
+      --accent-soft: rgba(74, 222, 128, 0.22);
+      --secondary: #34d399;
+      --secondary-soft: rgba(52, 211, 153, 0.2);
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45);
+      --overlay-backdrop: rgba(0, 0, 0, 0.65);
+      --login-hex-1: rgba(74, 222, 128, 0.11);
+      --login-hex-2: rgba(74, 222, 128, 0.06);
     }
     * { box-sizing: border-box; }
     html, body {
@@ -71,16 +78,56 @@
       color: inherit;
     }
     .login-page {
+      position: relative;
+      overflow: hidden;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem 1rem 2.5rem;
       background-color: var(--bg-page);
-      background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%231e5bb4' fill-opacity='0.07'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM27 41.34l-11-6.35v-13l11 6.35v13zm0-18.49L16 16.6v-13l11 6.35v13zm1-16.17l-13-7.5v-2.31l13 7.5v2.31zm0 35.18l-13 7.5V49h2v-6.35L28 42.31v-2.3zM15 0h-2v6.35L0 12.69v2.3l13 7.5V7.5L15 0zm0 49h-2v-6.35L0 35.81v-2.3l13-7.5v15L15 49z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    /* Hexágonos grandes nos cantos (estilo do logo); parte do desenho fica fora da tela */
+    .login-bg-deco {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .login-bg-hex {
+      position: absolute;
+      width: min(110vmin, 720px);
+      height: min(110vmin, 720px);
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      -webkit-clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+    .login-bg-hex--tl {
+      top: 0;
+      left: 0;
+      transform: translate(-42%, -48%) rotate(-8deg);
+      background: var(--login-hex-1);
+    }
+    .login-bg-hex--tr {
+      top: 0;
+      right: 0;
+      transform: translate(42%, -44%) rotate(14deg);
+      background: var(--login-hex-2);
+    }
+    .login-bg-hex--br {
+      bottom: 0;
+      right: 0;
+      transform: translate(46%, 48%) rotate(-11deg);
+      background: var(--login-hex-1);
+    }
+    .login-bg-hex--bl {
+      bottom: 0;
+      left: 0;
+      transform: translate(-46%, 44%) rotate(9deg);
+      background: var(--login-hex-2);
     }
     .login-stack {
+      position: relative;
+      z-index: 1;
       width: 100%;
       max-width: 420px;
       display: flex;
@@ -106,7 +153,8 @@
     }
     .login-card-lead {
       margin: 0 0 0.85rem;
-      font-size: 0.88rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
       color: var(--text-muted);
       line-height: 1.45;
     }
@@ -127,7 +175,7 @@
       background: var(--bg-page);
       margin-bottom: 0.85rem;
     }
-    html[data-theme="dark"] .input { background: #222b3e; }
+    html[data-theme="dark"] .input { background: #2c2c2c; }
     .input:focus {
       outline: none;
       border-color: var(--accent);
@@ -146,7 +194,7 @@
     }
     html[data-theme="dark"] .btn-primary {
       background: var(--accent);
-      color: #0c1018;
+      color: #0f172a;
     }
     .btn-primary:hover { filter: brightness(1.06); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -236,6 +284,12 @@
 </head>
 <body>
   <div class="login-page">
+    <div class="login-bg-deco" aria-hidden="true">
+      <span class="login-bg-hex login-bg-hex--tl"></span>
+      <span class="login-bg-hex login-bg-hex--tr"></span>
+      <span class="login-bg-hex login-bg-hex--br"></span>
+      <span class="login-bg-hex login-bg-hex--bl"></span>
+    </div>
     <div class="login-stack">
       <img
         class="login-hero-brand"
@@ -291,7 +345,7 @@
           localStorage.setItem(LS_THEME, dark ? "dark" : "light");
         } catch (e) {}
         var m = document.getElementById("meta-theme-color");
-        if (m) m.setAttribute("content", dark ? "#0c1018" : "#E8ECF3");
+        if (m) m.setAttribute("content", dark ? "#0f0f0f" : "#fafafa");
       }
       document.getElementById("login-theme-toggle").addEventListener("click", function () {
         applyTheme(document.documentElement.getAttribute("data-theme") !== "dark");

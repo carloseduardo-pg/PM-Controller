@@ -1,5 +1,5 @@
 /* PO Diary — cache da interface e fallback offline básico */
-const CACHE = "po-diary-shell-v7";
+const CACHE = "po-diary-shell-v10";
 const PRECACHE = [
   "/",
   "/index.html",

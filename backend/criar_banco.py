@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta
 from typing import Any, Protocol
 
 # Rodar `python .../backend/criar_banco.py` não coloca a raiz do repo em sys.path; corrigimos aqui.
@@ -240,8 +239,8 @@ def criar_esquema(cursor: _SqlCursor) -> None:
     )
 
 
-def popular_dados_teste(cursor: _SqlCursor) -> None:
-    """Insere pelo menos 2 clientes, 3 projetos e vários logs com durações variadas."""
+def popular_dados_iniciais(cursor: _SqlCursor) -> None:
+    """Se não houver clientes, insere suas empresas e projetos atuais (sem dados fictícios de diário/agenda)."""
     cursor.execute(f"USE `{DB_NAME}`")
 
     cursor.execute("SELECT COUNT(*) AS n FROM clientes")
@@ -252,80 +251,17 @@ def popular_dados_teste(cursor: _SqlCursor) -> None:
     cursor.execute(
         """
         INSERT INTO clientes (nome) VALUES
-            ('Acme Corp'),
-            ('Beta Solutions Ltda')
+            ('João Barbosa Advocacia'),
+            ('FB Minerios')
         """
     )
 
     cursor.execute(
         """
         INSERT INTO projetos (cliente_id, nome, ativo) VALUES
-            (1, 'Portal do Cliente', TRUE),
-            (1, 'Integração ERP', TRUE),
-            (2, 'App Mobile MVP', TRUE)
+            (1, 'Protótipo SAJ 2026', TRUE),
+            (2, 'BA Santana - Manus Breno', TRUE)
         """
-    )
-
-    base = datetime(2026, 5, 5, 9, 0, 0)
-
-    def _log_row(
-        pid: int, start: datetime, cat: str, desc: str, mins: int
-    ) -> tuple[Any, ...]:
-        return (pid, start, start + timedelta(minutes=mins), cat, desc, mins)
-
-    logs: list[tuple[Any, ...]] = [
-        _log_row(1, base + timedelta(days=0, hours=2), "planejamento", "Kickoff e escopo do portal.", 120),
-        _log_row(1, base + timedelta(days=0, hours=5), "reuniao", "Alinhamento com stakeholders.", 90),
-        _log_row(1, base + timedelta(days=1, hours=1), "desenvolvimento", "Revisão de PRs e backlog.", 45),
-        _log_row(2, base + timedelta(days=1, hours=4), "suporte", "Esclarecimento de regra de negócio.", 30),
-        _log_row(2, base + timedelta(days=2, hours=0), "documentacao", "Atualização do RFC da integração.", 180),
-        _log_row(3, base + timedelta(days=2, hours=4), "reuniao", "Demo interna do MVP.", 60),
-        _log_row(3, base + timedelta(days=3, hours=2), "desenvolvimento", "Testes E2E e ajustes finais.", 240),
-        _log_row(1, base + timedelta(days=3, hours=8), "outro", "Retrospectiva rápida.", 15),
-        _log_row(2, base + timedelta(days=4, hours=1), "planejamento", "Planejamento da próxima sprint.", 75),
-    ]
-
-    cursor.executemany(
-        """
-        INSERT INTO logs_diarios (projeto_id, data_hora, data_hora_fim, categoria, descricao, duracao_minutos)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """,
-        logs,
-    )
-
-    agenda_rows: list[tuple[Any, ...]] = [
-        (
-            1,
-            "Review com cliente",
-            "Validar wireframes da home.",
-            base + timedelta(days=5, hours=14),
-            base + timedelta(days=5, hours=13, minutes=30),
-            "pendente",
-        ),
-        (
-            2,
-            "Go-live ERP",
-            "Checklist de deploy.",
-            base + timedelta(days=7, hours=10),
-            None,
-            "pendente",
-        ),
-        (
-            3,
-            "Publicação beta",
-            "Release para grupo piloto.",
-            base + timedelta(days=6, hours=16),
-            base + timedelta(days=6, hours=15),
-            "adiado",
-        ),
-    ]
-
-    cursor.executemany(
-        """
-        INSERT INTO agenda (projeto_id, titulo, descricao, data_hora_agendada, notificar_em, status)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """,
-        agenda_rows,
     )
 
 
@@ -339,7 +275,7 @@ def main() -> int:
         try:
             criar_esquema(cursor)
             garantir_usuario_padrao(cursor)
-            popular_dados_teste(cursor)
+            popular_dados_iniciais(cursor)
             conn.commit()
         except Error:
             conn.rollback()
@@ -349,7 +285,7 @@ def main() -> int:
 
         print(f"Banco `{DB_NAME}` criado/atualizado com sucesso.")
         print("Login da aplicação: usuário cadu (criado se não existia; senha inicial senha123).")
-        print("Dados de teste inseridos (se o banco estava vazio de clientes/projetos).")
+        print("Empresas e projetos iniciais inseridos (somente se ainda não havia clientes no banco).")
         return 0
 
     except Error as e:
